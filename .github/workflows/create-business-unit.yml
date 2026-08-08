@@ -7,10 +7,6 @@ on:
         description: "New Business Unit name (also used as the ExternalKey/CustomerKey)"
         required: true
         type: string
-      admin_user_keys:
-        description: "Comma-separated AccountUser CustomerKeys to grant admin access. Leave blank to use the default admin list (repo variable DEFAULT_ADMIN_USER_KEYS)."
-        required: false
-        type: string
 
 jobs:
   create-business-unit:
@@ -47,5 +43,4 @@ jobs:
           LOG_DE_KEY: ${{ vars.LOG_DE_KEY }}
           DEFAULT_ADMIN_USER_KEYS: ${{ vars.DEFAULT_ADMIN_USER_KEYS }}
           BU_NAME: ${{ inputs.bu_name }}
-          ADMIN_USER_KEYS: ${{ inputs.admin_user_keys }}
         run: npm run create-bu

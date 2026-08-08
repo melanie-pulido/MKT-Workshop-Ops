@@ -56,11 +56,10 @@ async function main() {
 
   // --- Per-request inputs (from the workflow_dispatch form) ---
   const buName = requireEnv("BU_NAME").trim();
-  const adminUserKeysRaw =
-    process.env.ADMIN_USER_KEYS && process.env.ADMIN_USER_KEYS.trim().length > 0
-      ? process.env.ADMIN_USER_KEYS
-      : requireEnv("DEFAULT_ADMIN_USER_KEYS");
-  const adminUserKeys = adminUserKeysRaw
+
+  // Admin users are always the backend-configured default list (repo Variable
+  // DEFAULT_ADMIN_USER_KEYS) — there is no per-run override input anymore.
+  const adminUserKeys = requireEnv("DEFAULT_ADMIN_USER_KEYS")
     .split(",")
     .map((k) => k.trim())
     .filter(Boolean);

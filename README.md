@@ -2,15 +2,16 @@
 
 Recreates the old CloudPage automation (`1.1 Create Business Unit`, `1.2 Update
 Business Unit Settings`, `1.3 Add Admin Users to BU`) as a single GitHub
-Actions workflow. A team member enters a BU name (and optionally a custom
-admin list) via the **Run workflow** form under the Actions tab — no CloudPage,
-no Data Extension trigger row, no SSJS.
+Actions workflow. A team member enters a BU name via the **Run workflow**
+form under the Actions tab — no CloudPage, no Data Extension trigger row,
+no SSJS.
 
 ## How it works
 
 1. `.github/workflows/create-business-unit.yml` defines a `workflow_dispatch`
-   trigger with two inputs: `bu_name` (required) and `admin_user_keys`
-   (optional, comma-separated AccountUser CustomerKeys).
+   trigger with a single input: `bu_name` (required). Admin users are always
+   the backend-configured list in the repo Variable `DEFAULT_ADMIN_USER_KEYS`
+   — there's no per-run override field on the form.
 2. The job runs `scripts/run.js`, which:
    - Authenticates to SFMC via REST OAuth (`client_credentials`).
    - Creates the Business Unit via the SOAP `Create` call (same payload shape
@@ -77,7 +78,7 @@ if reused from a different org by mistake.
 | `COMPANY_ZIP` | `00000` | |
 | `COMPANY_COUNTRY` | `US` | |
 | `LOG_DE_KEY` | `Automation_Log_CreateBU` | ExternalKey of the log DE in *this* org (create one with columns `BU_Name`, `Status`, `LogDate` if it doesn't exist yet) |
-| `DEFAULT_ADMIN_USER_KEYS` | `<this-orgs-user-customerkey-1>,<this-orgs-user-customerkey-2>` | AccountUser CustomerKeys from *this* org's Setup → Users, used when the form's `admin_user_keys` input is left blank |
+| `DEFAULT_ADMIN_USER_KEYS` | `<this-orgs-user-customerkey-1>,<this-orgs-user-customerkey-2>` | AccountUser CustomerKeys from *this* org's Setup → Users. Every new BU gets exactly this admin list — there is no per-run override, so keep this current as the org's admin roster changes. |
 
 ### 4. (Optional but recommended) Require approval before running
 
@@ -91,9 +92,9 @@ don't want this gate, delete the `environment:` line from the workflow file.
 
 1. Go to the **Actions** tab → **Create Business Unit** → **Run workflow**.
 2. Enter the new BU name.
-3. Optionally override the admin user list (comma-separated CustomerKeys).
-4. Click **Run workflow** and watch the job summary for step-by-step
-   progress, same as the `Write()` output on the old CloudPage.
+3. Click **Run workflow** and watch the job summary for step-by-step
+   progress, same as the `Write()` output on the old CloudPage. Admin access
+   is granted automatically to the users in `DEFAULT_ADMIN_USER_KEYS`.
 
 ## Differences from the old CloudPage solution
 
@@ -119,7 +120,7 @@ don't want this gate, delete the `environment:` line from the workflow file.
 - Swap the manual form for an Issue template or Slack slash command if you
   want a lower-friction intake path (both can still call this same
   workflow via `repository_dispatch` or `gh workflow run`).
-- If you later want an LLM to parse free-text requests into `bu_name` /
-  `admin_user_keys`, add a step before `Run Business Unit automation` that
-  calls the Claude API and feeds its structured output into `env:` — the
-  core SFMC logic in `scripts/run.js` doesn't need to change.
+- If you later want an LLM to parse free-text requests into `bu_name`, add a
+  step before `Run Business Unit automation` that calls the Claude API and
+  feeds its structured output into `env:` — the core SFMC logic in
+  `scripts/run.js` doesn't need to change.
