@@ -1,0 +1,34 @@
+name: Create Users
+description: Create a batch of new SFMC Marketing Cloud users in a Business Unit
+title: "Create Users: "
+labels:
+  - create-users
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill this in and submit — a workflow will pick it up automatically,
+        create the users, and post the results as a comment on this issue.
+        Password, role(s), and email are pre-configured and not set here.
+  - type: input
+    id: target_bu_name
+    attributes:
+      label: Business Unit Name
+      description: Must match exactly as it appears in Setup → Account → Business Units.
+      placeholder: e.g. NTO Student BU 0001
+    validations:
+      required: true
+  - type: textarea
+    id: user_list
+    attributes:
+      label: User List
+      description: >
+        One user per line: username, then Full Name — tab or comma
+        separated. Paste two columns straight from a spreadsheet; each
+        row keeps its own line here (unlike the Actions "Run workflow"
+        form, which collapses pasted rows onto one line).
+      placeholder: |
+        MKT001_0001	NTO Student 0001
+        MKT001_0002	NTO Student 0002
+    validations:
+      required: true

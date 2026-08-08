@@ -212,20 +212,49 @@ want a human approval gate before the job calls SFMC. Delete the
 
 ## Running it
 
-1. Go to the **Actions** tab → **Create Users** → **Run workflow**.
+There are two ways to trigger this — **use the Issue Form**, not the
+Actions "Run workflow" button, if you're pasting more than one user.
+
+### Option A: Issue Form (recommended — supports pasting multiple users)
+
+GitHub's Actions "Run workflow" web form only gives a single-line box for
+text inputs, so pasting multiple spreadsheet rows into it collapses every
+row onto one line (tabs survive, but the newlines between rows don't).
+The Issue Form has a real multi-line textarea, so this is the reliable
+path whenever you're submitting more than one user at a time.
+
+1. Go to the **Issues** tab → **New issue** → **Create Users** template.
 2. Enter the target **Business Unit name** exactly as it appears in
-   Setup → Account → Business Units (the script resolves it to a MID —
-   a typo/mismatch fails the whole run before any users are touched).
+   Setup → Account → Business Units.
 3. Paste the user list into the textarea — **one user per line**, as
    `username,Full Name` (comma or tab separated, so you can paste two
    columns straight out of a spreadsheet without reformatting). For
    example:
 
    ```
-   jsmith@school.edu	Jane Smith
-   bwong@school.edu	Bob Wong
+   MKT001_0001	NTO Student 0001
+   MKT001_0002	NTO Student 0002
    ```
 
+4. Submit the issue. `.github/workflows/create-users-issue.yml` picks it
+   up automatically (it triggers on the issue's `create-users` label,
+   applied by the template), runs the same automation as Option B below,
+   posts the per-user results table as a **comment on the issue**, and
+   closes the issue automatically if every user succeeded. If anything
+   failed, the issue is left open with the failure details in the comment
+   so you can fix and resubmit.
+
+### Option B: workflow_dispatch (fine for a single user, or scripted runs)
+
+1. Go to the **Actions** tab → **Create Users** → **Run workflow**.
+2. Enter the target **Business Unit name** (same rules as above).
+3. Enter the user list — **this box only accepts one line reliably** when
+   used from the web UI; pasting multiple rows here will merge them onto
+   one line. Use the Issue Form (Option A) instead if you have more than
+   one user. This trigger is still useful for a single test user, or for
+   scripted runs via `gh workflow run create-users.yml -f target_bu_name=... -f user_list="$(cat file.txt)"`,
+   which — because it goes through the GitHub API rather than the web
+   form — does preserve real newlines from a file.
 4. Click **Run workflow** and watch the job summary for a per-user
    status table (Create result + password-never-expire Update result).
 
