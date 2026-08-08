@@ -14,7 +14,7 @@ const xmlParser = new XMLParser({ ignoreAttributes: false });
 class SfmcClient {
   /**
    * @param {object} cfg
-   * @param {string} cfg.subdomain    SFMC "tssd" subdomain, e.g. mch23rd4bzvth-hsj3hy8mkg9494
+   * @param {string} cfg.subdomain    SFMC "tssd" subdomain for this org (from Setup > Installed Packages)
    * @param {string} cfg.clientId
    * @param {string} cfg.clientSecret
    * @param {string} [cfg.accountId]  Optional target MID for the token scope (parent business unit)

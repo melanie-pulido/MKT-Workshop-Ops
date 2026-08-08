@@ -44,7 +44,7 @@ Never paste these into a chat/AI tool — enter them directly in GitHub's UI.
 
 | Secret | Description |
 |---|---|
-| `SFMC_SUBDOMAIN` | Your SFMC tenant subdomain (the "tssd", e.g. `mch23rd4bzvth-hsj3hy8mkg9494`) |
+| `SFMC_SUBDOMAIN` | Your SFMC tenant subdomain (the "tssd", found in Setup → Apps → Installed Packages, e.g. `abc1def2ghij3klmno4pqr5stu` — this is org-specific, do not reuse another org's value) |
 | `SFMC_CLIENT_ID` | Installed Package Client ID |
 | `SFMC_CLIENT_SECRET` | Installed Package Client Secret |
 
@@ -58,19 +58,25 @@ These are the org-level values that used to be hardcoded at the top of each
 script — not secret, just config, so they're safe to keep as plain repo
 Variables.
 
-| Variable | Example | Notes |
+**⚠️ All example values below are placeholders only — fill in this org's own
+values.** None of these should be copied from another org/tenant (parent MID,
+addresses, and admin user keys are all org-specific and will silently create
+BUs under the wrong parent account, or grant access to the wrong org's users,
+if reused from a different org by mistake.
+
+| Variable | Example (placeholder — replace with this org's value) | Notes |
 |---|---|---|
-| `SFMC_PARENT_MID` | `517035316` | Parent enterprise MID |
-| `BU_EMAIL` | `marketing@sfmctraining.com` | Default sending email on the new BU |
-| `BU_FROM_NAME` | `Northern Trail Outfitters` | |
-| `COMPANY_NAME` | `Northern Trail Outfitters` | |
-| `COMPANY_ADDRESS` | `36 S Pennsylvania St` | |
-| `COMPANY_CITY` | `Indianapolis` | |
-| `COMPANY_STATE` | `IN` | |
-| `COMPANY_ZIP` | `46237` | |
+| `SFMC_PARENT_MID` | `000000000` | This org's parent/enterprise MID, from Setup → Account → Account Details |
+| `BU_EMAIL` | `marketing@yourcompany.com` | Default sending email on the new BU |
+| `BU_FROM_NAME` | `Your Company Name` | |
+| `COMPANY_NAME` | `Your Company Name` | |
+| `COMPANY_ADDRESS` | `123 Main St` | |
+| `COMPANY_CITY` | `Your City` | |
+| `COMPANY_STATE` | `XX` | |
+| `COMPANY_ZIP` | `00000` | |
 | `COMPANY_COUNTRY` | `US` | |
-| `LOG_DE_KEY` | `Automation_Log_CreateBU` | ExternalKey of the existing log DE |
-| `DEFAULT_ADMIN_USER_KEYS` | `2fd72fe8-056a-44da-bd58-8577bae607c1,41d00814-c9a4-41f0-a846-af2410ce288c` | Used when the form's `admin_user_keys` input is left blank |
+| `LOG_DE_KEY` | `Automation_Log_CreateBU` | ExternalKey of the log DE in *this* org (create one with columns `BU_Name`, `Status`, `LogDate` if it doesn't exist yet) |
+| `DEFAULT_ADMIN_USER_KEYS` | `<this-orgs-user-customerkey-1>,<this-orgs-user-customerkey-2>` | AccountUser CustomerKeys from *this* org's Setup → Users, used when the form's `admin_user_keys` input is left blank |
 
 ### 4. (Optional but recommended) Require approval before running
 
