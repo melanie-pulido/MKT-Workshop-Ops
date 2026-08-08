@@ -211,9 +211,19 @@ class SfmcClient {
    * does not reliably honor it — this is exactly why the original
    * automation needed a *separate* Update call afterward
    * (see updateUserMustChangePasswordFalse below). Create still assigns
-   * the BU, role, and initial password.
+   * the BU, role(s), and initial password.
+   *
+   * `roleIDs` accepts one or more Role ObjectIDs — a user can hold
+   * multiple roles simultaneously (e.g. Administrator + Marketing Cloud
+   * VIW), each rendered as its own <Role> element inside <Roles>.
    */
-  async createUser({ userId, password, name, email, authMID, targetMID, roleID }) {
+  async createUser({ userId, password, name, email, authMID, targetMID, roleIDs }) {
+    const roleList = Array.isArray(roleIDs) ? roleIDs : [roleIDs];
+    const rolesXml = roleList
+      .filter(Boolean)
+      .map((id) => `<Role><ObjectID>${escapeXml(id)}</ObjectID></Role>`)
+      .join("");
+
     const body =
       '<CreateRequest xmlns="http://exacttarget.com/wsdl/partnerAPI">' +
       '<Objects xsi:type="AccountUser">' +
@@ -229,7 +239,7 @@ class SfmcClient {
       "<AssociatedBusinessUnits>" +
       `<BusinessUnit><ID>${targetMID}</ID></BusinessUnit>` +
       "</AssociatedBusinessUnits>" +
-      `<Roles><Role><ObjectID>${escapeXml(roleID)}</ObjectID></Role></Roles>` +
+      `<Roles>${rolesXml}</Roles>` +
       "</Objects>" +
       "</CreateRequest>";
 

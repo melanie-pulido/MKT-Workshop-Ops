@@ -64,7 +64,12 @@ async function main() {
 
   // --- Org-level config (repo Variables, fixed) ---
   const authMID = requireEnv("SFMC_PARENT_MID");
-  const roleID = requireEnv("DEFAULT_USER_ROLE_ID");
+  // Comma-separated list of Role ObjectIDs — every created user gets all
+  // of these roles at once (e.g. Administrator + Marketing Cloud VIW).
+  const roleIDs = requireEnv("DEFAULT_USER_ROLE_ID")
+    .split(",")
+    .map((r) => r.trim())
+    .filter(Boolean);
   const userEmail = requireEnv("DEFAULT_USER_EMAIL");
   const logDeKey = process.env.LOG_DE_KEY || "Automation_Log_CreateVIWStudent";
 
@@ -130,7 +135,7 @@ async function main() {
         email: userEmail,
         authMID,
         targetMID,
-        roleID,
+        roleIDs,
       });
 
       if (!createResult.ok) {

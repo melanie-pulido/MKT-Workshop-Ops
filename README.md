@@ -199,7 +199,7 @@ values.**
 | Variable | Example (placeholder) | Notes |
 |---|---|---|
 | `SFMC_PARENT_MID` | `000000000` | Same enterprise parent MID used for API auth context as the Create Business Unit workflow. |
-| `DEFAULT_USER_ROLE_ID` | `d2be5e3f-4a43-f011-a5d5-5cba2c6ff268` | The Role ObjectID every new user is assigned (matches `config.roleID` in the original `2.1`/`2.2` scripts). |
+| `DEFAULT_USER_ROLE_ID` | `d2be5e3f-4a43-f011-a5d5-5cba2c6ff268` | One or more Role ObjectIDs every new user is assigned, comma-separated (e.g. `Administrator,Marketing Cloud VIW` → their ObjectIDs). Look up Role ObjectIDs via a SOAP `Retrieve` on `ObjectType Role` if you don't already have them — role GUIDs are org-specific. |
 | `DEFAULT_USER_EMAIL` | `viw-students@yourcompany.com` | The single fixed email/notification address used for every created user (per this org's stated setup, all users share one email). |
 | `LOG_DE_KEY_CREATE_USERS` | `Automation_Log_CreateVIWStudent` | ExternalKey of the log DE in *this* org (create one with columns `Username`, `Status`, `Message`, `LogDate` if it doesn't exist yet). Kept as a separate Variable name from the BU workflow's `LOG_DE_KEY` so the two workflows can log to different DEs without colliding. |
 
