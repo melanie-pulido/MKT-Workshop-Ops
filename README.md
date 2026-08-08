@@ -142,20 +142,25 @@ don't want this gate, delete the `environment:` line from the workflow file.
 
 Recreates the old CloudPage automation (`2.1 Create Student Users`, `2.2
 Update Student Users`) as a single GitHub Actions workflow. A team member
-provides the target Business Unit MID and a list of usernames via the **Run
+provides the target Business Unit name and a list of usernames via the **Run
 workflow** form — no CloudPage, no Data Extension trigger row, no SSJS.
 
 ## How it works
 
 1. `.github/workflows/create-users.yml` defines a `workflow_dispatch`
-   trigger with two inputs: `target_bu_mid` (the MID to create the users
-   in) and `user_list` (a multi-line textarea — see format below).
+   trigger with two inputs: `target_bu_name` (the Business Unit's name — not
+   the MID) and `user_list` (a multi-line textarea — see format below).
 2. The job runs `scripts/create-users.js`, which:
    - Authenticates to SFMC via REST OAuth (`client_credentials`).
+   - Retrieves all Business Units and resolves `target_bu_name` to its MID
+     (the same `retrieveBusinessUnitMap()` lookup the Create Business Unit
+     workflow uses to resolve a newly created BU's MID by name). Fails
+     fast with a clear error if no BU matches the given name, before
+     touching any users.
    - Parses `user_list` into individual users.
    - For each user, calls SOAP `Create` on `AccountUser` (mirrors `2.1`),
      using the hardcoded default password, role, and email, and assigning
-     the user to `target_bu_mid`.
+     the user to the resolved MID.
    - **Then** calls a separate SOAP `Update` on that same `AccountUser`
      setting `MustChangePassword` to `false` (mirrors `2.2`). This has to
      be a second, separate call — SFMC's `Create` does not reliably honor
@@ -168,7 +173,7 @@ workflow** form — no CloudPage, no Data Extension trigger row, no SSJS.
    - Writes a human-readable progress table to the GitHub Actions job
      summary.
 
-Everything **except** the target BU MID and the usernames/names is
+Everything **except** the target BU name and the usernames/names is
 hardcoded as repo Secrets/Variables — password, role, and email are fixed
 per org, matching the request that the team only ever has to supply "which
 BU" and "which usernames."
@@ -208,7 +213,9 @@ want a human approval gate before the job calls SFMC. Delete the
 ## Running it
 
 1. Go to the **Actions** tab → **Create Users** → **Run workflow**.
-2. Enter the target **Business Unit MID**.
+2. Enter the target **Business Unit name** exactly as it appears in
+   Setup → Account → Business Units (the script resolves it to a MID —
+   a typo/mismatch fails the whole run before any users are touched).
 3. Paste the user list into the textarea — **one user per line**, as
    `username,Full Name` (comma or tab separated, so you can paste two
    columns straight out of a spreadsheet without reformatting). For
@@ -226,7 +233,8 @@ want a human approval gate before the job calls SFMC. Delete the
 
 - **No Data Extension trigger row required.** The old flow required
   loading `Student_Details_DE` and running an automation against it. Here,
-  the BU MID and user list are direct form inputs.
+  the BU name and user list are direct form inputs, with the MID resolved
+  automatically at run time (same as the Create Business Unit workflow).
 - **The required two-call sequence (Create, then Update
   `MustChangePassword`) is preserved exactly**, including the reason for
   it — it's implemented as two SOAP calls per user inside one script run,

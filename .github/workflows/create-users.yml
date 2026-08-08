@@ -3,8 +3,8 @@ name: Create Users
 on:
   workflow_dispatch:
     inputs:
-      target_bu_mid:
-        description: "Business Unit MID the users should be created in"
+      target_bu_name:
+        description: "Business Unit name the users should be created in (resolved to a MID at run time)"
         required: true
         type: string
       user_list:
@@ -39,6 +39,6 @@ jobs:
           DEFAULT_USER_ROLE_ID: ${{ vars.DEFAULT_USER_ROLE_ID }}
           DEFAULT_USER_EMAIL: ${{ vars.DEFAULT_USER_EMAIL }}
           LOG_DE_KEY: ${{ vars.LOG_DE_KEY_CREATE_USERS }}
-          TARGET_BU_MID: ${{ inputs.target_bu_mid }}
+          TARGET_BU_NAME: ${{ inputs.target_bu_name }}
           USER_LIST: ${{ inputs.user_list }}
         run: npm run create-users

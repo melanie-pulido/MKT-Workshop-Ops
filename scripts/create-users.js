@@ -12,8 +12,11 @@
  *
  * Inputs come from workflow_dispatch (see .github/workflows/create-users.yml)
  * mapped to env vars by the workflow. Org-level config (password, role,
- * email, parent MID) comes from repo Secrets/Variables; the per-run BU MID
- * and user list come from the workflow form.
+ * email, parent MID) comes from repo Secrets/Variables; the per-run BU name
+ * and user list come from the workflow form. The BU name is resolved to a
+ * MID at runtime via retrieveBusinessUnitMap() -- the same lookup the
+ * Create Business Unit workflow already uses to resolve a newly created
+ * BU's MID by name (see scripts/run.js Step 3).
  */
 
 const fs = require("fs");
@@ -66,7 +69,7 @@ async function main() {
   const logDeKey = process.env.LOG_DE_KEY || "Automation_Log_CreateVIWStudent";
 
   // --- Per-request inputs (from the workflow_dispatch form) ---
-  const targetMID = requireEnv("TARGET_BU_MID").trim();
+  const targetBuName = requireEnv("TARGET_BU_NAME").trim();
   const userListRaw = requireEnv("USER_LIST");
   const users = parseUserList(userListRaw);
 
@@ -74,13 +77,28 @@ async function main() {
     throw new Error("No users parsed from the user list input. Expected one 'username,Full Name' pair per line.");
   }
 
-  summaryLine(`## Create Users in BU ${targetMID}`);
+  summaryLine(`## Create Users in BU "${targetBuName}"`);
   summaryLine("");
   summaryLine(`Users to create: ${users.length}`);
   summaryLine("");
 
   const client = new SfmcClient({ subdomain, clientId, clientSecret, accountId: authMID });
   await client.authenticate();
+
+  // Resolve the BU name to a MID before touching any users -- fail fast
+  // and clearly if the name is wrong/misspelled, rather than partway
+  // through creating users.
+  const buMap = await client.retrieveBusinessUnitMap();
+  const targetMID = buMap[targetBuName];
+
+  if (!targetMID) {
+    summaryLine(`❌ **FAILED:** Could not find a Business Unit named "${targetBuName}".`);
+    process.exitCode = 1;
+    return;
+  }
+
+  summaryLine(`Resolved "${targetBuName}" -> MID ${targetMID}`);
+  summaryLine("");
 
   const log = async (username, status, message) => {
     try {
