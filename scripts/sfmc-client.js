@@ -167,23 +167,30 @@ class SfmcClient {
   }
 
   /**
-   * Insert a row into a Data Extension via REST (replaces
-   * Platform.Function.InsertData used by the SSJS log DE).
+   * Insert a row into a Data Extension via SOAP DataExtensionObject Create
+   * (replaces Platform.Function.InsertData used by the SSJS log DE).
+   *
+   * Uses SOAP rather than the REST customobjectdata/rowset endpoint: in
+   * testing, some Installed Packages that have full SOAP DataExtensionObject
+   * write access still get a 404 from the REST rowset endpoint (that REST
+   * surface appears to be permissioned/enabled separately). SOAP Create is
+   * the more broadly-supported write path for existing packages.
    */
   async logRow(deKey, row) {
-    const url = `${this.restBase}/data/v1/customobjectdata/key/${encodeURIComponent(deKey)}/rowset`;
-    const payload = [
-      {
-        keys: {},
-        values: row,
-      },
-    ];
-    await axios.post(url, payload, {
-      headers: {
-        Authorization: `Bearer ${this.accessToken}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const properties = Object.entries(row)
+      .map(([name, value]) => `<Property><Name>${escapeXml(name)}</Name><Value>${escapeXml(value)}</Value></Property>`)
+      .join("");
+
+    const body =
+      '<CreateRequest xmlns="http://exacttarget.com/wsdl/partnerAPI">' +
+      '<Objects xsi:type="DataExtensionObject">' +
+      `<CustomerKey>${escapeXml(deKey)}</CustomerKey>` +
+      `<Properties>${properties}</Properties>` +
+      "</Objects>" +
+      "</CreateRequest>";
+
+    const raw = await this._soapRequest("Create", body);
+    return parseCreateOrUpdateResult(raw);
   }
 
   /** Clear all rows from a Data Extension (replaces WSProxy ClearData). */
