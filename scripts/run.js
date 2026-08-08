@@ -35,7 +35,15 @@ async function main() {
   const clientSecret = requireEnv("SFMC_CLIENT_SECRET");
 
   // --- Org-level config (repo Variables, fixed) ---
-  const parentMID = requireEnv("SFMC_PARENT_MID");
+  // authMID is the enterprise parent used for API auth/Client context on every
+  // SOAP call (unchanged behavior). nestUnderMID is the MID of the BU that
+  // newly created BUs should be nested under (ParentID) — a hardcoded repo
+  // Variable, same pattern as authMID itself, rather than resolved by name at
+  // runtime: MID is the durable identifier in SFMC (renaming the BU doesn't
+  // change it), and hardcoding it avoids an extra Retrieve call and a runtime
+  // failure mode if the BU's name ever changes or is mistyped.
+  const authMID = requireEnv("SFMC_PARENT_MID");
+  const nestUnderMID = requireEnv("NEST_UNDER_BU_MID");
   const buEmail = requireEnv("BU_EMAIL");
   const fromName = requireEnv("BU_FROM_NAME");
   const companyName = requireEnv("COMPANY_NAME");
@@ -68,7 +76,7 @@ async function main() {
   summaryLine(`Admins to assign: ${adminUserKeys.join(", ")}`);
   summaryLine("");
 
-  const client = new SfmcClient({ subdomain, clientId, clientSecret, accountId: parentMID });
+  const client = new SfmcClient({ subdomain, clientId, clientSecret, accountId: authMID });
   await client.authenticate();
 
   const log = async (status) => {
@@ -86,13 +94,15 @@ async function main() {
   // === Step 1: Create Business Unit (mirrors 1.1) ===
   summaryLine("### Step 1 of 4: Create Business Unit");
   await log("New Business Unit Initiated (Step 1 of 4)");
+  summaryLine(`Nesting new BU under MID: ${nestUnderMID}.`);
 
   const createResult = await client.createBusinessUnit({
     name: buName,
     customerKey,
     email: buEmail,
     fromName,
-    parentMID,
+    authMID,
+    nestUnderMID,
     businessName: companyName,
     address: streetAddr,
     city,
@@ -115,7 +125,7 @@ async function main() {
   summaryLine("");
   summaryLine("### Step 2 of 4: Update Business Unit settings");
 
-  const updateResult = await client.updateBusinessUnitUnsubscribe({ customerKey, parentMID });
+  const updateResult = await client.updateBusinessUnitUnsubscribe({ customerKey, parentMID: authMID });
 
   if (!updateResult.ok) {
     await log(`Failed Step 3: ${updateResult.statusMessage}`);
@@ -152,7 +162,7 @@ async function main() {
       const assignResult = await client.assignUserToBusinessUnit({
         userCustomerKey: userKey,
         targetMID,
-        parentMID,
+        parentMID: authMID,
       });
       const mark = assignResult.ok ? "✅ OK" : `❌ ${assignResult.statusMessage}`;
       if (!assignResult.ok) anyFailed = true;

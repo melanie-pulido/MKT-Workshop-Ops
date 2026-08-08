@@ -66,7 +66,8 @@ if reused from a different org by mistake.
 
 | Variable | Example (placeholder — replace with this org's value) | Notes |
 |---|---|---|
-| `SFMC_PARENT_MID` | `000000000` | This org's parent/enterprise MID, from Setup → Account → Account Details |
+| `SFMC_PARENT_MID` | `000000000` | This org's parent/enterprise MID, from Setup → Account → Account Details. Used only as the API auth/Client context on every call — **not** necessarily where new BUs get nested (see `NEST_UNDER_BU_MID` below). |
+| `NEST_UNDER_BU_MID` | `111111111` | MID of the existing Business Unit that new BUs should be created *under* (their `ParentID`) — for this org, the MID of the `!VIW Parent` BU. Look it up once via Setup → Account → Business Units (or the Business Unit's own Account Details page) and hardcode it here, same as `SFMC_PARENT_MID`. MID is the durable identifier — it doesn't change if the BU is later renamed, so hardcoding it here is more reliable than looking it up by name on every run. |
 | `BU_EMAIL` | `marketing@yourcompany.com` | Default sending email on the new BU |
 | `BU_FROM_NAME` | `Your Company Name` | |
 | `COMPANY_NAME` | `Your Company Name` | |

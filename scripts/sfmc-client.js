@@ -74,13 +74,23 @@ class SfmcClient {
     return response.data;
   }
 
-  /** Create a Business Unit. Mirrors 1.1 Create Business Unit.js */
+  /**
+   * Create a Business Unit. Mirrors 1.1 Create Business Unit.js
+   *
+   * `authMID` is the API call context (Client ID) — the same enterprise
+   * parent used for auth/every SOAP call, unchanged from before.
+   * `nestUnderMID` is the MID of the BU the new BU should actually be
+   * created as a child of (ParentID) — this can now differ from authMID,
+   * e.g. nesting new BUs under an intermediate BU like "!VIW Parent"
+   * instead of directly under the enterprise top-level MID.
+   */
   async createBusinessUnit({
     name,
     customerKey,
     email,
     fromName,
-    parentMID,
+    authMID,
+    nestUnderMID,
     businessName,
     address,
     city,
@@ -96,8 +106,8 @@ class SfmcClient {
       `<Email>${escapeXml(email)}</Email>` +
       `<FromName>${escapeXml(fromName)}</FromName>` +
       "<AccountType>BUSINESS_UNIT</AccountType>" +
-      `<ParentID>${parentMID}</ParentID>` +
-      `<Client><ID>${parentMID}</ID></Client>` +
+      `<ParentID>${nestUnderMID}</ParentID>` +
+      `<Client><ID>${authMID}</ID></Client>` +
       `<BusinessName>${escapeXml(businessName)}</BusinessName>` +
       `<Address>${escapeXml(address)}</Address>` +
       `<City>${escapeXml(city)}</City>` +

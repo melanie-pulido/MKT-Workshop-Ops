@@ -35,6 +35,7 @@ jobs:
           SFMC_CLIENT_ID: ${{ secrets.SFMC_CLIENT_ID }}
           SFMC_CLIENT_SECRET: ${{ secrets.SFMC_CLIENT_SECRET }}
           SFMC_PARENT_MID: ${{ vars.SFMC_PARENT_MID }}
+          NEST_UNDER_BU_MID: ${{ vars.NEST_UNDER_BU_MID }}
           BU_EMAIL: ${{ vars.BU_EMAIL }}
           BU_FROM_NAME: ${{ vars.BU_FROM_NAME }}
           COMPANY_NAME: ${{ vars.COMPANY_NAME }}
