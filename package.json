@@ -1,0 +1,14 @@
+{
+  "name": "sfmc-create-business-unit",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Creates a new SFMC Business Unit, configures its unsubscribe settings, and assigns admin users — driven by a GitHub Actions workflow_dispatch form.",
+  "type": "commonjs",
+  "scripts": {
+    "create-bu": "node scripts/run.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "fast-xml-parser": "^4.5.0"
+  }
+}
