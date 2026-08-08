@@ -203,6 +203,60 @@ class SfmcClient {
     return parseCreateOrUpdateResult(raw);
   }
 
+  /**
+   * Create an AccountUser (SFMC Marketing Cloud user). Mirrors
+   * "2.1 Create Student Users.js" Step 3's Create call.
+   *
+   * MustChangePassword is sent as false here too, but SFMC's Create call
+   * does not reliably honor it — this is exactly why the original
+   * automation needed a *separate* Update call afterward
+   * (see updateUserMustChangePasswordFalse below). Create still assigns
+   * the BU, role, and initial password.
+   */
+  async createUser({ userId, password, name, email, authMID, targetMID, roleID }) {
+    const body =
+      '<CreateRequest xmlns="http://exacttarget.com/wsdl/partnerAPI">' +
+      '<Objects xsi:type="AccountUser">' +
+      `<Client><ID>${authMID}</ID></Client>` +
+      `<UserID>${escapeXml(userId)}</UserID>` +
+      `<Password>${escapeXml(password)}</Password>` +
+      `<Name>${escapeXml(name)}</Name>` +
+      `<Email>${escapeXml(email)}</Email>` +
+      `<NotificationEmailAddress>${escapeXml(email)}</NotificationEmailAddress>` +
+      "<ActiveFlag>true</ActiveFlag>" +
+      "<MustChangePassword>false</MustChangePassword>" +
+      `<DefaultBusinessUnit>${targetMID}</DefaultBusinessUnit>` +
+      "<AssociatedBusinessUnits>" +
+      `<BusinessUnit><ID>${targetMID}</ID></BusinessUnit>` +
+      "</AssociatedBusinessUnits>" +
+      `<Roles><Role><ObjectID>${escapeXml(roleID)}</ObjectID></Role></Roles>` +
+      "</Objects>" +
+      "</CreateRequest>";
+
+    const raw = await this._soapRequest("Create", body);
+    return parseCreateOrUpdateResult(raw);
+  }
+
+  /**
+   * Update an existing AccountUser so the password is not required to be
+   * changed again ("password never expires" in Setup UI terms). This is
+   * the second call in the required create-then-update sequence — Mirrors
+   * "2.2 Update Student Users.js".
+   */
+  async updateUserMustChangePasswordFalse({ userId, authMID }) {
+    const body =
+      '<UpdateRequest xmlns="http://exacttarget.com/wsdl/partnerAPI">' +
+      '<Objects xsi:type="AccountUser">' +
+      `<Client><ID>${authMID}</ID></Client>` +
+      `<UserID>${escapeXml(userId)}</UserID>` +
+      "<MustChangePassword>false</MustChangePassword>" +
+      "</Objects>" +
+      "</UpdateRequest>";
+
+    const raw = await this._soapRequest("Update", body);
+    return parseCreateOrUpdateResult(raw);
+  }
+
   /** Clear all rows from a Data Extension (replaces WSProxy ClearData). */
   async clearDataExtension(deKey) {
     const body =
