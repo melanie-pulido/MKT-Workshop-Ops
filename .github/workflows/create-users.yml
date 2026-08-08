@@ -1,0 +1,44 @@
+name: Create Users
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_bu_mid:
+        description: "Business Unit MID the users should be created in"
+        required: true
+        type: string
+      user_list:
+        description: "One user per line: username,Full Name (tab or comma separated — paste two columns straight from a spreadsheet)"
+        required: true
+        type: string
+
+jobs:
+  create-users:
+    runs-on: ubuntu-latest
+    environment: sfmc-production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Create Users automation
+        env:
+          SFMC_SUBDOMAIN: ${{ secrets.SFMC_SUBDOMAIN }}
+          SFMC_CLIENT_ID: ${{ secrets.SFMC_CLIENT_ID }}
+          SFMC_CLIENT_SECRET: ${{ secrets.SFMC_CLIENT_SECRET }}
+          DEFAULT_USER_PASSWORD: ${{ secrets.DEFAULT_USER_PASSWORD }}
+          SFMC_PARENT_MID: ${{ vars.SFMC_PARENT_MID }}
+          DEFAULT_USER_ROLE_ID: ${{ vars.DEFAULT_USER_ROLE_ID }}
+          DEFAULT_USER_EMAIL: ${{ vars.DEFAULT_USER_EMAIL }}
+          LOG_DE_KEY: ${{ vars.LOG_DE_KEY_CREATE_USERS }}
+          TARGET_BU_MID: ${{ inputs.target_bu_mid }}
+          USER_LIST: ${{ inputs.user_list }}
+        run: npm run create-users
