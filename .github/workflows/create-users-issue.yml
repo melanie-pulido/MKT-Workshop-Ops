@@ -31,6 +31,23 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Rename issue title with creation timestamp
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          CREATED_AT: ${{ github.event.issue.created_at }}
+        run: |
+          # github.event.issue.created_at is always UTC (ISO 8601). Formatted
+          # as e.g. "New User Creation - 08/10/2026 6:57PM UTC" -- GitHub
+          # Issue Forms can't pre-fill a live timestamp into the title field
+          # itself (title: is static text in the template), so this renames
+          # the issue right after creation instead, using the real
+          # server-recorded creation time rather than the submitter's local
+          # clock (which could be wrong/spoofed).
+          STAMP="$(date -u -d "$CREATED_AT" +"%m/%d/%Y %-I:%M%p UTC")"
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --title "New User Creation - $STAMP"
+
       - name: Parse issue body into TARGET_BU_NAME / USER_LIST
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
