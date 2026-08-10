@@ -23,12 +23,14 @@ body:
     attributes:
       label: User List
       description: >
-        One user per line: username, then Full Name — tab or comma
-        separated. Paste two columns straight from a spreadsheet; each
-        row keeps its own line here (unlike the Actions "Run workflow"
-        form, which collapses pasted rows onto one line).
+        One user per line: Full Name, then username — comma, tab, or
+        pipe (|) separated. You can paste two columns directly from
+        Google Sheets (the markdown table it generates is handled
+        automatically) or paste plain CSV text — either works. Each row
+        keeps its own line here (unlike the Actions "Run workflow" form,
+        which collapses pasted rows onto one line).
       placeholder: |
-        MKT001_0001	NTO Student 0001
-        MKT001_0002	NTO Student 0002
+        NTO Student 0001	MKT001_0001
+        NTO Student 0002	MKT001_0002
     validations:
       required: true

@@ -39,20 +39,54 @@ function summaryLine(line) {
 }
 
 /**
- * Parses the multi-line "username,Full Name" (or tab-separated) textarea
- * input into { userId, name } objects. One user per line. Blank lines and
- * a header row (if someone pastes "username,name") are skipped.
+ * Parses the multi-line "Full Name,username" (or tab-separated) textarea
+ * input into { userId, name } objects. Column order is Name first,
+ * Username second, matching how the source Google Sheet is laid out.
+ *
+ * Handles three paste shapes so both a direct Google Sheets copy-paste
+ * and a plain CSV download-then-paste work without reformatting:
+ *
+ * 1. Plain "Name,Username" or "Name<TAB>Username" per line (CSV-style).
+ * 2. A raw Google Sheets copy-paste, which wraps the data in an HTML
+ *    comment like:
+ *      <google-sheets-html-origin><style>...</style>
+ *      Name | Username
+ *      -- | --
+ *      NTO Student 0001 | MKT001_0001
+ *    That comment/style noise and the markdown table's own header +
+ *    "-- | --" separator row are stripped before parsing rows.
+ * 3. A plain markdown pipe table pasted without the Sheets wrapper
+ *    (same "Name | Username" / "-- | --" shape, just no HTML comment).
+ *
+ * Blank lines and a literal header row ("name,username"/"name | username")
+ * are skipped either way.
  */
 function parseUserList(raw) {
-  return raw
+  // Strip Google Sheets' HTML wrapper (the <google-sheets-html-origin>
+  // comment and inline <style> block it injects) if present -- it isn't
+  // valid HTML on its own, so this is done with a targeted string strip
+  // rather than an HTML parser.
+  let cleaned = raw.replace(/<google-sheets-html-origin>[\s\S]*?<\/style>/i, "");
+
+  // Drop a markdown table's "-- | --" (or "---|---", any dash count)
+  // separator row -- it carries no user data.
+  cleaned = cleaned
+    .split(/\r?\n/)
+    .filter((line) => !/^\s*:?-+:?\s*(\|\s*:?-+:?\s*)+$/.test(line))
+    .join("\n");
+
+  return cleaned
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => {
-      const parts = line.split(/\t|,/).map((p) => p.trim());
-      return { userId: parts[0] || "", name: parts[1] || "" };
+      // Markdown table rows use " | " between cells; plain CSV/TSV rows
+      // use a bare comma or tab. Try pipe first since a name could
+      // legitimately contain a comma but a pipe is unambiguous.
+      const parts = (line.includes("|") ? line.split("|") : line.split(/\t|,/)).map((p) => p.trim());
+      return { name: parts[0] || "", userId: parts[1] || "" };
     })
-    .filter((u) => u.userId && u.userId.toLowerCase() !== "username");
+    .filter((u) => u.userId && u.name.toLowerCase() !== "name" && u.userId.toLowerCase() !== "username");
 }
 
 async function main() {

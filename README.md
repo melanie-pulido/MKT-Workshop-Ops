@@ -227,14 +227,25 @@ path whenever you're submitting more than one user at a time.
 2. Enter the target **Business Unit name** exactly as it appears in
    Setup → Account → Business Units.
 3. Paste the user list into the textarea — **one user per line**, as
-   `username,Full Name` (comma or tab separated, so you can paste two
-   columns straight out of a spreadsheet without reformatting). For
-   example:
+   `Full Name,username` (Name first, username second — matching the
+   source spreadsheet's column order). Comma, tab, or pipe (`|`)
+   separated, so you can paste two columns straight out of a spreadsheet
+   without reformatting. Two paste methods both work:
+   - **Direct copy-paste from Google Sheets** — Sheets wraps this in a
+     markdown table plus an HTML comment; the parser strips both
+     automatically. For example, pasting these two Sheet cells:
 
-   ```
-   MKT001_0001	NTO Student 0001
-   MKT001_0002	NTO Student 0002
-   ```
+     ```
+     NTO Student 0001 | MKT001_0001
+     NTO Student 0002 | MKT001_0002
+     ```
+   - **Download as CSV first, then paste** — plain comma-separated text,
+     no markdown table wrapper:
+
+     ```
+     NTO Student 0001,MKT001_0001
+     NTO Student 0002,MKT001_0002
+     ```
 
 4. Submit the issue. `.github/workflows/create-users-issue.yml` picks it
    up automatically (it triggers on the issue's `create-users` label,
@@ -275,8 +286,8 @@ path whenever you're submitting more than one user at a time.
 
 ## Extending later
 
-- If a future request needs a genuinely different email/name per user
-  instead of the one shared email, add a third column to the `user_list`
-  format (e.g. `username,Full Name,email`) and thread it through
+- If a future request needs a genuinely different email per user instead
+  of the one shared email, add a third column to the `user_list` format
+  (e.g. `Full Name,username,email`) and thread it through
   `parseUserList()` and `createUser()` in `scripts/create-users.js` —
   no other structural change needed.
