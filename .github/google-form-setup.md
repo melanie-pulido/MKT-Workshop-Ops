@@ -12,9 +12,30 @@ Go to [forms.google.com](https://forms.google.com) and create a new form.
 
 **Form title:** MKT Workshop Operations
 
-**Restrict to Salesforce accounts (recommended):**
-Settings (⚙️) → Responses → Check "Restrict to users in Salesforce and trusted organizations"
-This ensures only `@salesforce.com` accounts can submit.
+### Required form settings (do these first)
+
+Click **Settings (⚙️)** at the top and configure:
+
+| Tab | Setting | Value |
+|---|---|---|
+| Responses | Collect email addresses | **Responder input** → change to **Verified** |
+| Responses | Restrict to users in Salesforce and trusted organizations | ✅ Checked |
+| Presentation | Confirmation message | See below |
+
+**Confirmation message** (paste this exactly):
+```
+Your request has been submitted and is being processed.
+
+View the status here:
+https://github.com/melanie-pulido/MKT-Workshop-Ops/issues
+
+Your request will appear at the top of the list within seconds.
+You will also receive a confirmation email with a direct link.
+```
+
+> **"Collect email addresses: Verified"** is what auto-fills their email from their
+> Google login — no typing needed. It also lets the script send them the confirmation
+> email with a direct link to their specific issue.
 
 ---
 
@@ -40,7 +61,6 @@ Add these questions (all **Short answer**, all **Required**):
 
 | Question title | Notes |
 |---|---|
-| `Organization` | Type: **Dropdown** — options: `MC Events 2 (MID 517022562)` / `MC Events 3 (MID 517035532)` |
 | `Full Name` | Short answer |
 | `Username` | Short answer |
 | `Email Address` | Short answer |
@@ -91,7 +111,7 @@ At the bottom: **"After section 4" → Submit form**
 
 ## Step 3 — Store your GitHub token
 
-You need a PAT from `mricheson_sfemu` on github.com with **repo** scope.
+You need a PAT from `melanie-pulido` on github.com with **repo** scope.
 
 1. In the Apps Script editor: **Project Settings** (⚙️ left sidebar) → **Script Properties**
 2. Click **Add property**
@@ -121,14 +141,18 @@ If you see 401/403, the token is wrong or not SSO-authorized for the repo.
    - Event source: `From form`
    - Event type: `On form submit`
 3. Click **Save** — it will ask you to authorize the script, click through
+   - When prompted for permissions, approve **both** "Connect to an external service"
+     (for GitHub API) and "Send email as you" (for confirmation emails)
 
 ---
 
 ## Step 6 — Test end-to-end
 
 1. Open the form (Preview 👁️) and submit a test entry
-2. Check `https://github.com/mricheson_sfemu/MKT-Workshop-Ops/issues` — a new issue should appear within seconds with the right label
-3. The workflow will fire and post results as a comment on that issue
+2. The confirmation page should appear with the link to the issues list
+3. Check `https://github.com/melanie-pulido/MKT-Workshop-Ops/issues` — a new issue should appear within seconds with the right label
+4. Check your email — you should receive a confirmation with a direct link to your issue
+5. The workflow will fire and post results as a comment on that issue
 
 ---
 
@@ -137,4 +161,5 @@ If you see 401/403, the token is wrong or not SSO-authorized for the repo.
 Once tested, click **Send** in the form and copy the link.
 Share it with your team — that's all they need. No GitHub account required.
 
-To restrict to `@salesforce.com` only: Settings → Responses → "Restrict to users in Salesforce"
+Submitters must be logged into a `@salesforce.com` Google account to submit.
+Their email is captured automatically — no need to type it.
