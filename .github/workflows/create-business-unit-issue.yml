@@ -1,12 +1,15 @@
 name: Create Business Unit (Issue Form)
 
-# Fires when a "Create Business Unit" issue (see
-# .github/ISSUE_TEMPLATE/create-business-unit.yml) is opened or labeled.
+# Fires when the create-business-unit label is applied to an issue.
+# The issue template auto-applies this label on submission, so this fires
+# exactly once per submission. Using labeled (not opened) avoids a double-
+# trigger race: if both opened and labeled fire simultaneously for the same
+# issue, two runs race each other and the second fails with "duplicate key".
 # Exists alongside the workflow_dispatch trigger in
 # create-business-unit.yml, which is kept as a fallback for scripted runs.
 on:
   issues:
-    types: [opened, labeled]
+    types: [labeled]
 
 jobs:
   create-business-unit:

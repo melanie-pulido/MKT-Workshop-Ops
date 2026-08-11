@@ -9,7 +9,7 @@ name: Create Users (Issue Form)
 # paste. Both triggers run the exact same scripts/create-users.js.
 on:
   issues:
-    types: [opened, labeled]
+    types: [labeled]
 
 jobs:
   create-users:
