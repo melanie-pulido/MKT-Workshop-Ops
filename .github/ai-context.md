@@ -1,4 +1,4 @@
-# AI Context — MKTVIW-Setup GitHub Actions
+# AI Context — MKT-Workshop-Ops GitHub Actions
 
 This file exists so a future AI session can pick up exactly where the previous
 one left off. Paste it in at the start of a new conversation.
@@ -177,7 +177,7 @@ Header rows with literal values `"name"` / `"username"` (case-insensitive) are s
 
 Paste the following prompt (adjust as needed):
 
-> I'm working on a GitHub Actions repo at `https://github.com/melanie-pulido/MKTVIW-Setup`.
+> I'm working on a GitHub Actions repo at `https://github.com/melanie-pulido/MKT-Workshop-Ops`.
 > It automates SFMC Marketing Cloud Business Unit creation and user creation via GitHub Issue Forms.
 > The repo is cloned locally at `/tmp/mktviw`.
 > Read `.github/ai-context.md` in the repo for full context on how everything works.
@@ -185,5 +185,5 @@ Paste the following prompt (adjust as needed):
 
 The local clone at `/tmp/mktviw` may or may not persist between sessions — if it doesn't, re-clone:
 ```bash
-gh repo clone melanie-pulido/MKTVIW-Setup /tmp/mktviw
+gh repo clone melanie-pulido/MKT-Workshop-Ops /tmp/mktviw
 ```
