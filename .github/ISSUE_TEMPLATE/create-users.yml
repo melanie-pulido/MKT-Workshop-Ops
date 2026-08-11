@@ -1,6 +1,6 @@
 name: Create Users
 description: Create a batch of new SFMC Marketing Cloud users in a Business Unit
-title: "Create New Marketing Cloud Users"
+title: "Request"
 labels:
   - create-users
 body:
