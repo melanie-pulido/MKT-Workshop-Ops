@@ -65,15 +65,11 @@ async function main() {
   const buName = requireEnv("BU_NAME").trim();
 
   // Admin users are always the backend-configured default list (repo Variable
-  // DEFAULT_ADMIN_USER_KEYS) — there is no per-run override input anymore.
-  const adminUserKeys = requireEnv("DEFAULT_ADMIN_USER_KEYS")
+  // DEFAULT_ADMIN_USER_KEYS) — optional, can be empty if no admins needed.
+  const adminUserKeys = (process.env.DEFAULT_ADMIN_USER_KEYS || "")
     .split(",")
     .map((k) => k.trim())
     .filter(Boolean);
-
-  if (adminUserKeys.length === 0) {
-    throw new Error("No admin user keys provided (input and default list were both empty).");
-  }
 
   const customerKey = buName; // Matches original scripts: BU Name doubles as CustomerKey/ExternalKey
 
@@ -146,6 +142,15 @@ async function main() {
   // === Step 3: Look up the new BU's MID, then assign admin users (mirrors 1.3) ===
   summaryLine("");
   summaryLine("### Step 3 of 4: Assign admin users");
+
+  if (adminUserKeys.length === 0) {
+    summaryLine("_(No admin users configured — skipping assignment.)_");
+    await log("Business Unit Permissions Updated (Step 4 of 4)");
+    await log("New Business Unit Automation Complete");
+    summaryLine("");
+    summaryLine("### ✅ Business Unit automation complete.");
+    return;
+  }
 
   const buMap = await client.retrieveBusinessUnitMap();
   const targetMID = buMap[buName];
