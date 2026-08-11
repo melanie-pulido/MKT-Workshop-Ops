@@ -32,7 +32,7 @@ jobs:
           REPO: ${{ github.repository }}
           CREATED_AT: ${{ github.event.issue.created_at }}
         run: |
-          STAMP="$(date -u -d "$CREATED_AT" +"%m/%d/%Y %-I:%M%p UTC")"
+          STAMP="$(TZ='America/Los_Angeles' date -d "$CREATED_AT" +"%m/%d/%Y %-I:%M%p PST")"
           gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --title "New Business Unit Creation - $STAMP"
           gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "⏳ New Business Unit Creation in progress…"
 
