@@ -15,7 +15,7 @@
  *   Name: GITHUB_TOKEN   Value: <your PAT with repo scope>
  */
 
-var REPO = "mricheson_sfemu/MKT-Workshop-Ops";
+var REPO = "melanie-pulido/MKT-Workshop-Ops";
 
 // ---------------------------------------------------------------------------
 // Main entry point — wired to the form's onFormSubmit trigger
@@ -50,7 +50,21 @@ function onFormSubmit(e) {
     return;
   }
 
-  createGitHubIssue(title, body, label);
+  var submitterEmail = e.response.getRespondentEmail();
+  var issueUrl = createGitHubIssue(title, body, label);
+
+  if (issueUrl && submitterEmail) {
+    MailApp.sendEmail({
+      to:      submitterEmail,
+      subject: "✅ Request received: " + title,
+      body:    "Your request has been received and is being processed.\n\n" +
+               "You can track the status and see the results here:\n" +
+               issueUrl + "\n\n" +
+               "Results will appear as a comment on that page within a minute or two.\n\n" +
+               "— MKT Workshop Ops"
+    });
+    Logger.log("Confirmation email sent to: " + submitterEmail);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -109,8 +123,10 @@ function createGitHubIssue(title, body, label) {
 
   if (code === 201) {
     Logger.log("Issue created: " + result.html_url);
+    return result.html_url;
   } else {
     Logger.log("ERROR " + code + ": " + response.getContentText());
+    return null;
   }
 }
 
