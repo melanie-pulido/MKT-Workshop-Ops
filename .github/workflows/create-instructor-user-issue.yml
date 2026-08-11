@@ -1,6 +1,5 @@
 name: Create Instructor User (Issue Form)
 
-# Fires when the create-instructor-user label is applied to an issue.
 on:
   issues:
     types: [labeled]
@@ -42,18 +41,60 @@ jobs:
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: node scripts/parse-instructor-issue-body.js
 
+      - name: Route org credentials
+        env:
+          ORG: ${{ env.ORG }}
+          MC_EVENTS_2_SUBDOMAIN:          ${{ secrets.MC_EVENTS_2_SUBDOMAIN }}
+          MC_EVENTS_2_CLIENT_ID:          ${{ secrets.MC_EVENTS_2_CLIENT_ID }}
+          MC_EVENTS_2_CLIENT_SECRET:      ${{ secrets.MC_EVENTS_2_CLIENT_SECRET }}
+          MC_EVENTS_2_PARENT_MID:         ${{ vars.MC_EVENTS_2_PARENT_MID }}
+          MC_EVENTS_2_INSTRUCTOR_ROLE_ID: ${{ vars.MC_EVENTS_2_INSTRUCTOR_ROLE_ID }}
+          MC_EVENTS_2_INSTRUCTOR_BU_NAME: ${{ vars.MC_EVENTS_2_INSTRUCTOR_BU_NAME }}
+          MC_EVENTS_2_LOG_DE_KEY_CREATE_USERS: ${{ vars.MC_EVENTS_2_LOG_DE_KEY_CREATE_USERS }}
+          MC_EVENTS_3_SUBDOMAIN:          ${{ secrets.MC_EVENTS_3_SUBDOMAIN }}
+          MC_EVENTS_3_CLIENT_ID:          ${{ secrets.MC_EVENTS_3_CLIENT_ID }}
+          MC_EVENTS_3_CLIENT_SECRET:      ${{ secrets.MC_EVENTS_3_CLIENT_SECRET }}
+          MC_EVENTS_3_PARENT_MID:         ${{ vars.MC_EVENTS_3_PARENT_MID }}
+          MC_EVENTS_3_INSTRUCTOR_ROLE_ID: ${{ vars.MC_EVENTS_3_INSTRUCTOR_ROLE_ID }}
+          MC_EVENTS_3_INSTRUCTOR_BU_NAME: ${{ vars.MC_EVENTS_3_INSTRUCTOR_BU_NAME }}
+          MC_EVENTS_3_LOG_DE_KEY_CREATE_USERS: ${{ vars.MC_EVENTS_3_LOG_DE_KEY_CREATE_USERS }}
+        run: |
+          case "$ORG" in
+            "MC Events 2 (MID 517022562)")
+              {
+                echo "SFMC_SUBDOMAIN=$MC_EVENTS_2_SUBDOMAIN"
+                echo "SFMC_CLIENT_ID=$MC_EVENTS_2_CLIENT_ID"
+                echo "SFMC_CLIENT_SECRET=$MC_EVENTS_2_CLIENT_SECRET"
+                echo "SFMC_PARENT_MID=$MC_EVENTS_2_PARENT_MID"
+                echo "INSTRUCTOR_USER_ROLE_ID=$MC_EVENTS_2_INSTRUCTOR_ROLE_ID"
+                echo "INSTRUCTOR_BU_NAME=$MC_EVENTS_2_INSTRUCTOR_BU_NAME"
+                echo "LOG_DE_KEY=$MC_EVENTS_2_LOG_DE_KEY_CREATE_USERS"
+              } >> "$GITHUB_ENV"
+              ;;
+            "MC Events 3 (MID 517035532)")
+              {
+                echo "SFMC_SUBDOMAIN=$MC_EVENTS_3_SUBDOMAIN"
+                echo "SFMC_CLIENT_ID=$MC_EVENTS_3_CLIENT_ID"
+                echo "SFMC_CLIENT_SECRET=$MC_EVENTS_3_CLIENT_SECRET"
+                echo "SFMC_PARENT_MID=$MC_EVENTS_3_PARENT_MID"
+                echo "INSTRUCTOR_USER_ROLE_ID=$MC_EVENTS_3_INSTRUCTOR_ROLE_ID"
+                echo "INSTRUCTOR_BU_NAME=$MC_EVENTS_3_INSTRUCTOR_BU_NAME"
+                echo "LOG_DE_KEY=$MC_EVENTS_3_LOG_DE_KEY_CREATE_USERS"
+              } >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "❌ Unknown org: $ORG" >&2
+              exit 1
+              ;;
+          esac
+          echo "Routed credentials for: $ORG"
+
       - name: Run Create Instructor User automation
         id: run_automation
         continue-on-error: true
         env:
-          SFMC_SUBDOMAIN: ${{ secrets.SFMC_SUBDOMAIN }}
-          SFMC_CLIENT_ID: ${{ secrets.SFMC_CLIENT_ID }}
-          SFMC_CLIENT_SECRET: ${{ secrets.SFMC_CLIENT_SECRET }}
-          SFMC_PARENT_MID: ${{ vars.SFMC_PARENT_MID }}
-          INSTRUCTOR_USER_ROLE_ID: ${{ vars.INSTRUCTOR_USER_ROLE_ID }}
-          INSTRUCTOR_BU_NAME: ${{ vars.INSTRUCTOR_BU_NAME }}
           INSTRUCTOR_USER_PASSWORD: ${{ secrets.INSTRUCTOR_USER_PASSWORD }}
-          LOG_DE_KEY: ${{ vars.LOG_DE_KEY_CREATE_USERS }}
+          # All other credentials and INSTRUCTOR_NAME/USERNAME/EMAIL come from GITHUB_ENV.
         run: npm run create-instructor-user
 
       - name: Post results as an issue comment

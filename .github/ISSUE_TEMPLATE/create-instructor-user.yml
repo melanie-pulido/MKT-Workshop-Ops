@@ -11,6 +11,16 @@ body:
         create the instructor user in THA Internal, and post the result as
         a comment on this issue.
         Password and role are pre-configured and not set here.
+  - type: dropdown
+    id: org
+    attributes:
+      label: Organization
+      description: Which SFMC org should this instructor user be created in?
+      options:
+        - MC Events 2 (MID 517022562)
+        - MC Events 3 (MID 517035532)
+    validations:
+      required: true
   - type: input
     id: name
     attributes:

@@ -1,12 +1,5 @@
 name: Create Users (Issue Form)
 
-# Fires when a "Create Users" issue (see .github/ISSUE_TEMPLATE/create-users.yml)
-# is opened. Exists alongside the workflow_dispatch trigger in
-# create-users.yml because the Actions "Run workflow" web form only gives
-# a single-line box for text inputs — pasting multiple spreadsheet rows
-# into it collapses them onto one line. Issue Forms render a real
-# multi-line textarea, so this is the reliable path for the multi-user
-# paste. Both triggers run the exact same scripts/create-users.js.
 on:
   issues:
     types: [labeled]
@@ -39,36 +32,69 @@ jobs:
           REPO: ${{ github.repository }}
           CREATED_AT: ${{ github.event.issue.created_at }}
         run: |
-          # github.event.issue.created_at is always UTC (ISO 8601). Formatted
-          # as e.g. "New User Creation - 08/10/2026 6:57PM UTC" -- GitHub
-          # Issue Forms can't pre-fill a live timestamp into the title field
-          # itself (title: is static text in the template), so this renames
-          # the issue right after creation instead, using the real
-          # server-recorded creation time rather than the submitter's local
-          # clock (which could be wrong/spoofed).
           STAMP="$(date -u -d "$CREATED_AT" +"%m/%d/%Y %-I:%M%p UTC")"
           gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --title "New User Creation - $STAMP"
           gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "⏳ New User Creation in progress…"
 
-      - name: Parse issue body into TARGET_BU_NAME / USER_LIST
+      - name: Parse issue body
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
         run: node scripts/parse-issue-body.js
+
+      - name: Route org credentials
+        env:
+          ORG: ${{ env.ORG }}
+          MC_EVENTS_2_SUBDOMAIN:              ${{ secrets.MC_EVENTS_2_SUBDOMAIN }}
+          MC_EVENTS_2_CLIENT_ID:              ${{ secrets.MC_EVENTS_2_CLIENT_ID }}
+          MC_EVENTS_2_CLIENT_SECRET:          ${{ secrets.MC_EVENTS_2_CLIENT_SECRET }}
+          MC_EVENTS_2_PARENT_MID:             ${{ vars.MC_EVENTS_2_PARENT_MID }}
+          MC_EVENTS_2_DEFAULT_USER_ROLE_ID:   ${{ vars.MC_EVENTS_2_DEFAULT_USER_ROLE_ID }}
+          MC_EVENTS_2_DEFAULT_USER_EMAIL:     ${{ vars.MC_EVENTS_2_DEFAULT_USER_EMAIL }}
+          MC_EVENTS_2_LOG_DE_KEY_CREATE_USERS: ${{ vars.MC_EVENTS_2_LOG_DE_KEY_CREATE_USERS }}
+          MC_EVENTS_3_SUBDOMAIN:              ${{ secrets.MC_EVENTS_3_SUBDOMAIN }}
+          MC_EVENTS_3_CLIENT_ID:              ${{ secrets.MC_EVENTS_3_CLIENT_ID }}
+          MC_EVENTS_3_CLIENT_SECRET:          ${{ secrets.MC_EVENTS_3_CLIENT_SECRET }}
+          MC_EVENTS_3_PARENT_MID:             ${{ vars.MC_EVENTS_3_PARENT_MID }}
+          MC_EVENTS_3_DEFAULT_USER_ROLE_ID:   ${{ vars.MC_EVENTS_3_DEFAULT_USER_ROLE_ID }}
+          MC_EVENTS_3_DEFAULT_USER_EMAIL:     ${{ vars.MC_EVENTS_3_DEFAULT_USER_EMAIL }}
+          MC_EVENTS_3_LOG_DE_KEY_CREATE_USERS: ${{ vars.MC_EVENTS_3_LOG_DE_KEY_CREATE_USERS }}
+        run: |
+          case "$ORG" in
+            "MC Events 2 (MID 517022562)")
+              {
+                echo "SFMC_SUBDOMAIN=$MC_EVENTS_2_SUBDOMAIN"
+                echo "SFMC_CLIENT_ID=$MC_EVENTS_2_CLIENT_ID"
+                echo "SFMC_CLIENT_SECRET=$MC_EVENTS_2_CLIENT_SECRET"
+                echo "SFMC_PARENT_MID=$MC_EVENTS_2_PARENT_MID"
+                echo "DEFAULT_USER_ROLE_ID=$MC_EVENTS_2_DEFAULT_USER_ROLE_ID"
+                echo "DEFAULT_USER_EMAIL=$MC_EVENTS_2_DEFAULT_USER_EMAIL"
+                echo "LOG_DE_KEY=$MC_EVENTS_2_LOG_DE_KEY_CREATE_USERS"
+              } >> "$GITHUB_ENV"
+              ;;
+            "MC Events 3 (MID 517035532)")
+              {
+                echo "SFMC_SUBDOMAIN=$MC_EVENTS_3_SUBDOMAIN"
+                echo "SFMC_CLIENT_ID=$MC_EVENTS_3_CLIENT_ID"
+                echo "SFMC_CLIENT_SECRET=$MC_EVENTS_3_CLIENT_SECRET"
+                echo "SFMC_PARENT_MID=$MC_EVENTS_3_PARENT_MID"
+                echo "DEFAULT_USER_ROLE_ID=$MC_EVENTS_3_DEFAULT_USER_ROLE_ID"
+                echo "DEFAULT_USER_EMAIL=$MC_EVENTS_3_DEFAULT_USER_EMAIL"
+                echo "LOG_DE_KEY=$MC_EVENTS_3_LOG_DE_KEY_CREATE_USERS"
+              } >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "❌ Unknown org: $ORG" >&2
+              exit 1
+              ;;
+          esac
+          echo "Routed credentials for: $ORG"
 
       - name: Run Create Users automation
         id: run_automation
         continue-on-error: true
         env:
-          SFMC_SUBDOMAIN: ${{ secrets.SFMC_SUBDOMAIN }}
-          SFMC_CLIENT_ID: ${{ secrets.SFMC_CLIENT_ID }}
-          SFMC_CLIENT_SECRET: ${{ secrets.SFMC_CLIENT_SECRET }}
           DEFAULT_USER_PASSWORD: ${{ secrets.DEFAULT_USER_PASSWORD }}
-          SFMC_PARENT_MID: ${{ vars.SFMC_PARENT_MID }}
-          DEFAULT_USER_ROLE_ID: ${{ vars.DEFAULT_USER_ROLE_ID }}
-          DEFAULT_USER_EMAIL: ${{ vars.DEFAULT_USER_EMAIL }}
-          LOG_DE_KEY: ${{ vars.LOG_DE_KEY_CREATE_USERS }}
-          # TARGET_BU_NAME and USER_LIST come from GITHUB_ENV, written by
-          # the parse step above — no need to map them here.
+          # All other credentials and TARGET_BU_NAME / USER_LIST come from GITHUB_ENV.
         run: npm run create-users
 
       - name: Post results as an issue comment
@@ -78,9 +104,6 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
-          # GITHUB_STEP_SUMMARY is scoped per-step; the script writes
-          # an identical copy to /tmp/create-users-report.md so we can
-          # read it here across step boundaries.
           if [ -s /tmp/create-users-report.md ]; then
             cat /tmp/create-users-report.md > /tmp/comment-body.md
           else

@@ -60,14 +60,16 @@ function hashCode(str) {
 function main() {
   const body = requireEnv("ISSUE_BODY");
 
+  const org    = extractSection(body, "Organization");
   const buName = extractSection(body, "Business Unit Name");
 
-  if (!buName) {
-    throw new Error('Could not find a "Business Unit Name" section in the issue body.');
-  }
+  if (!org)    throw new Error('Could not find an "Organization" section in the issue body.');
+  if (!buName) throw new Error('Could not find a "Business Unit Name" section in the issue body.');
 
+  writeMultilineEnv("ORG",     org);
   writeMultilineEnv("BU_NAME", buName);
 
+  console.log(`Parsed Org:                "${org}"`);
   console.log(`Parsed Business Unit Name: "${buName}"`);
 }
 

@@ -72,18 +72,21 @@ function onFormSubmit(e) {
 // ---------------------------------------------------------------------------
 
 function formatInstructorBody(data) {
-  return "### Full Name\n\n"    + data["Full Name"]    + "\n\n" +
-         "### Username\n\n"     + data["Username"]     + "\n\n" +
-         "### Email Address\n\n"+ data["Email Address"];
+  return "### Organization\n\n"  + data["Organization"]  + "\n\n" +
+         "### Full Name\n\n"     + data["Full Name"]     + "\n\n" +
+         "### Username\n\n"      + data["Username"]      + "\n\n" +
+         "### Email Address\n\n" + data["Email Address"];
 }
 
 function formatUsersBody(data) {
-  return "### Business Unit Name\n\n" + data["Business Unit Name"] + "\n\n" +
+  return "### Organization\n\n"        + data["Organization"]        + "\n\n" +
+         "### Business Unit Name\n\n" + data["Business Unit Name"] + "\n\n" +
          "### User List\n\n"          + data["User List"];
 }
 
 function formatBUBody(data) {
-  return "### Business Unit Name\n\n" + data["Business Unit Name"];
+  return "### Organization\n\n"        + data["Organization"]        + "\n\n" +
+         "### Business Unit Name\n\n" + data["Business Unit Name"];
 }
 
 // ---------------------------------------------------------------------------

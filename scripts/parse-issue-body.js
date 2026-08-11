@@ -83,19 +83,19 @@ function hashCode(str) {
 function main() {
   const body = requireEnv("ISSUE_BODY");
 
+  const org          = extractSection(body, "Organization");
   const targetBuName = extractSection(body, "Business Unit Name");
-  const userList = extractSection(body, "User List");
+  const userList     = extractSection(body, "User List");
 
-  if (!targetBuName) {
-    throw new Error('Could not find a "Business Unit Name" section in the issue body.');
-  }
-  if (!userList) {
-    throw new Error('Could not find a "User List" section in the issue body.');
-  }
+  if (!org)          throw new Error('Could not find an "Organization" section in the issue body.');
+  if (!targetBuName) throw new Error('Could not find a "Business Unit Name" section in the issue body.');
+  if (!userList)     throw new Error('Could not find a "User List" section in the issue body.');
 
+  writeMultilineEnv("ORG",            org);
   writeMultilineEnv("TARGET_BU_NAME", targetBuName);
-  writeMultilineEnv("USER_LIST", userList);
+  writeMultilineEnv("USER_LIST",      userList);
 
+  console.log(`Parsed Org:                "${org}"`);
   console.log(`Parsed Business Unit Name: "${targetBuName}"`);
   console.log(`Parsed User List (${userList.split(/\r?\n/).filter(Boolean).length} non-blank lines).`);
 }
