@@ -33,3 +33,8 @@ body:
       placeholder: e.g. jsmith@example.com
     validations:
       required: true
+  - type: markdown
+    attributes:
+      value: |
+        **Password:** `journey@1`
+        *(pre-configured — cannot be changed here)*
