@@ -30,12 +30,19 @@ function requireEnv(name) {
   return v;
 }
 
+// GITHUB_STEP_SUMMARY is scoped per-step — a later step can't read the
+// file this step wrote because the env var points to a new empty file.
+// We also write to a fixed temp path that persists across steps so the
+// "Post results" step can cat it into the issue comment.
+const REPORT_PATH = "/tmp/create-users-report.md";
+
 function summaryLine(line) {
   console.log(line);
   const summaryPath = process.env.GITHUB_STEP_SUMMARY;
   if (summaryPath) {
     fs.appendFileSync(summaryPath, line + "\n");
   }
+  fs.appendFileSync(REPORT_PATH, line + "\n");
 }
 
 /**

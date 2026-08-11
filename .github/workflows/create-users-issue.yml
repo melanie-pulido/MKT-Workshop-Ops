@@ -77,11 +77,14 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
-          {
-            echo "## Create Users result"
-            echo ""
-            cat "$GITHUB_STEP_SUMMARY"
-          } > /tmp/comment-body.md
+          # GITHUB_STEP_SUMMARY is scoped per-step; the script writes
+          # an identical copy to /tmp/create-users-report.md so we can
+          # read it here across step boundaries.
+          if [ -s /tmp/create-users-report.md ]; then
+            cat /tmp/create-users-report.md > /tmp/comment-body.md
+          else
+            echo "_(No report generated — the automation step may have failed before producing output.)_" > /tmp/comment-body.md
+          fi
           gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body-file /tmp/comment-body.md
 
       - name: Close issue on success
