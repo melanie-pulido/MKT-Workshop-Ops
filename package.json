@@ -7,6 +7,7 @@
   "scripts": {
     "create-bu": "node scripts/run.js",
     "create-users": "node scripts/create-users.js",
+    "create-instructor-user": "node scripts/create-instructor-user.js",
     "delete-bu": "node scripts/delete-bu.js"
   },
   "dependencies": {

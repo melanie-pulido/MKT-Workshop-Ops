@@ -1,0 +1,35 @@
+name: Create Instructor User
+description: Create a single new SFMC Marketing Cloud instructor user in THA Internal
+title: "Create New Instructor User"
+labels:
+  - create-instructor-user
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill this in and submit — a workflow will pick it up automatically,
+        create the instructor user in THA Internal, and post the result as
+        a comment on this issue.
+        Password and role are pre-configured and not set here.
+  - type: input
+    id: name
+    attributes:
+      label: Full Name
+      placeholder: e.g. Jane Smith
+    validations:
+      required: true
+  - type: input
+    id: username
+    attributes:
+      label: Username
+      placeholder: e.g. THA_JSmith
+    validations:
+      required: true
+  - type: input
+    id: email
+    attributes:
+      label: Email Address
+      description: Used as both the reply-to email and notification email address.
+      placeholder: e.g. jsmith@example.com
+    validations:
+      required: true
