@@ -58,8 +58,7 @@ function onFormSubmit(e) {
 // ---------------------------------------------------------------------------
 
 function formatInstructorBody(data) {
-  return "### Organization\n\n" + data["Organization"] + "\n\n" +
-         "### Full Name\n\n"    + data["Full Name"]    + "\n\n" +
+  return "### Full Name\n\n"    + data["Full Name"]    + "\n\n" +
          "### Username\n\n"     + data["Username"]     + "\n\n" +
          "### Email Address\n\n"+ data["Email Address"];
 }
