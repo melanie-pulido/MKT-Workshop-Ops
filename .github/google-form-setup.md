@@ -91,7 +91,7 @@ At the bottom: **"After section 4" → Submit form**
 
 ## Step 3 — Store your GitHub token
 
-You need a PAT from `melanie-pulido` on github.com with **repo** scope.
+You need a PAT from `mricheson_sfemu` on github.com with **repo** scope.
 
 1. In the Apps Script editor: **Project Settings** (⚙️ left sidebar) → **Script Properties**
 2. Click **Add property**
@@ -127,7 +127,7 @@ If you see 401/403, the token is wrong or not SSO-authorized for the repo.
 ## Step 6 — Test end-to-end
 
 1. Open the form (Preview 👁️) and submit a test entry
-2. Check `https://github.com/melanie-pulido/MKT-Workshop-Ops/issues` — a new issue should appear within seconds with the right label
+2. Check `https://github.com/mricheson_sfemu/MKT-Workshop-Ops/issues` — a new issue should appear within seconds with the right label
 3. The workflow will fire and post results as a comment on that issue
 
 ---

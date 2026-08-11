@@ -15,7 +15,7 @@
  *   Name: GITHUB_TOKEN   Value: <your PAT with repo scope>
  */
 
-var REPO = "melanie-pulido/MKT-Workshop-Ops";
+var REPO = "mricheson_sfemu/MKT-Workshop-Ops";
 
 // ---------------------------------------------------------------------------
 // Main entry point — wired to the form's onFormSubmit trigger
