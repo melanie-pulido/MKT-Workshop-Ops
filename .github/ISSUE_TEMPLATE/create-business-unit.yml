@@ -15,7 +15,7 @@ body:
   - type: dropdown
     id: org
     attributes:
-      label: Organization
+      label: Environment
       description: Which SFMC org should this Business Unit be created in?
       options:
         - MC Events 2 (MID 517022562)

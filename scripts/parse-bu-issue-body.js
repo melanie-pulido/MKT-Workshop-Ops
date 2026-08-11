@@ -60,10 +60,10 @@ function hashCode(str) {
 function main() {
   const body = requireEnv("ISSUE_BODY");
 
-  const org    = extractSection(body, "Organization");
+  const org    = extractSection(body, "Environment");
   const buName = extractSection(body, "Business Unit Name");
 
-  if (!org)    throw new Error('Could not find an "Organization" section in the issue body.');
+  if (!org)    throw new Error('Could not find an "Environment" section in the issue body.');
   if (!buName) throw new Error('Could not find a "Business Unit Name" section in the issue body.');
 
   writeMultilineEnv("ORG",     org);

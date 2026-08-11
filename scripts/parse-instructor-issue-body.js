@@ -8,7 +8,7 @@
  *
  * Issue Form bodies look like:
  *
- *   ### Organization
+ *   ### Environment
  *
  *   MC Events 2 (MID 517022562)
  *
@@ -73,12 +73,12 @@ function hashCode(str) {
 function main() {
   const body = requireEnv("ISSUE_BODY");
 
-  const org      = extractSection(body, "Organization");
+  const org      = extractSection(body, "Environment");
   const name     = extractSection(body, "Full Name");
   const username = extractSection(body, "Username");
   const email    = extractSection(body, "Email Address");
 
-  if (!org)      throw new Error('Could not find an "Organization" section in the issue body.');
+  if (!org)      throw new Error('Could not find an "Environment" section in the issue body.');
   if (!name)     throw new Error('Could not find a "Full Name" section in the issue body.');
   if (!username) throw new Error('Could not find a "Username" section in the issue body.');
   if (!email)    throw new Error('Could not find an "Email Address" section in the issue body.');
