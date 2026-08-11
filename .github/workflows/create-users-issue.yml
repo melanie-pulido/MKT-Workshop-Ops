@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: sfmc-production
     permissions:
+      contents: read
       issues: write
     steps:
       - name: Checkout
