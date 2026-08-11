@@ -2,10 +2,15 @@
 
 /**
  * Parses the "Create Instructor User" GitHub Issue Form body into
- * INSTRUCTOR_NAME, INSTRUCTOR_USERNAME, and INSTRUCTOR_EMAIL, then
- * writes them to GITHUB_ENV so the next step can pick them up.
+ * INSTRUCTOR_ORG, INSTRUCTOR_NAME, INSTRUCTOR_USERNAME, and
+ * INSTRUCTOR_EMAIL, then writes them to GITHUB_ENV so the next step
+ * can pick them up.
  *
  * Issue Form bodies look like:
+ *
+ *   ### Organization
+ *
+ *   MC Events 2 (MID 517022562)
  *
  *   ### Full Name
  *
@@ -68,18 +73,22 @@ function hashCode(str) {
 function main() {
   const body = requireEnv("ISSUE_BODY");
 
+  const org      = extractSection(body, "Organization");
   const name     = extractSection(body, "Full Name");
   const username = extractSection(body, "Username");
   const email    = extractSection(body, "Email Address");
 
+  if (!org)      throw new Error('Could not find an "Organization" section in the issue body.');
   if (!name)     throw new Error('Could not find a "Full Name" section in the issue body.');
   if (!username) throw new Error('Could not find a "Username" section in the issue body.');
   if (!email)    throw new Error('Could not find an "Email Address" section in the issue body.');
 
+  writeMultilineEnv("INSTRUCTOR_ORG",      org);
   writeMultilineEnv("INSTRUCTOR_NAME",     name);
   writeMultilineEnv("INSTRUCTOR_USERNAME", username);
   writeMultilineEnv("INSTRUCTOR_EMAIL",    email);
 
+  console.log(`Parsed Org:      "${org}"`);
   console.log(`Parsed Name:     "${name}"`);
   console.log(`Parsed Username: "${username}"`);
   console.log(`Parsed Email:    "${email}"`);
