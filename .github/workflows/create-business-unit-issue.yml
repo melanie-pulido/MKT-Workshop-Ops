@@ -1,0 +1,94 @@
+name: Create Business Unit (Issue Form)
+
+# Fires when a "Create Business Unit" issue (see
+# .github/ISSUE_TEMPLATE/create-business-unit.yml) is opened or labeled.
+# Exists alongside the workflow_dispatch trigger in
+# create-business-unit.yml, which is kept as a fallback for scripted runs.
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  create-business-unit:
+    if: contains(github.event.issue.labels.*.name, 'create-business-unit')
+    runs-on: ubuntu-latest
+    environment: sfmc-production
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Rename issue title with creation timestamp
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          CREATED_AT: ${{ github.event.issue.created_at }}
+        run: |
+          STAMP="$(date -u -d "$CREATED_AT" +"%m/%d/%Y %-I:%M%p UTC")"
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --title "New Business Unit Creation - $STAMP"
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "⏳ New Business Unit Creation in progress…"
+
+      - name: Parse issue body into BU_NAME
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: node scripts/parse-bu-issue-body.js
+
+      - name: Run Create Business Unit automation
+        id: run_automation
+        continue-on-error: true
+        env:
+          SFMC_SUBDOMAIN: ${{ secrets.SFMC_SUBDOMAIN }}
+          SFMC_CLIENT_ID: ${{ secrets.SFMC_CLIENT_ID }}
+          SFMC_CLIENT_SECRET: ${{ secrets.SFMC_CLIENT_SECRET }}
+          SFMC_PARENT_MID: ${{ vars.SFMC_PARENT_MID }}
+          NEST_UNDER_BU_MID: ${{ vars.NEST_UNDER_BU_MID }}
+          BU_EMAIL: ${{ vars.BU_EMAIL }}
+          BU_FROM_NAME: ${{ vars.BU_FROM_NAME }}
+          COMPANY_NAME: ${{ vars.COMPANY_NAME }}
+          COMPANY_ADDRESS: ${{ vars.COMPANY_ADDRESS }}
+          COMPANY_CITY: ${{ vars.COMPANY_CITY }}
+          COMPANY_STATE: ${{ vars.COMPANY_STATE }}
+          COMPANY_ZIP: ${{ vars.COMPANY_ZIP }}
+          COMPANY_COUNTRY: ${{ vars.COMPANY_COUNTRY }}
+          LOG_DE_KEY: ${{ vars.LOG_DE_KEY }}
+          DEFAULT_ADMIN_USER_KEYS: ${{ vars.DEFAULT_ADMIN_USER_KEYS }}
+          # BU_NAME comes from GITHUB_ENV, written by the parse step above.
+        run: npm run create-bu
+
+      - name: Post results as an issue comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -s /tmp/create-bu-report.md ]; then
+            cat /tmp/create-bu-report.md > /tmp/comment-body.md
+          else
+            echo "_(No report generated — the automation step may have failed before producing output.)_" > /tmp/comment-body.md
+          fi
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body-file /tmp/comment-body.md
+
+      - name: Close issue on success
+        if: steps.run_automation.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: gh issue close "$ISSUE_NUMBER" --repo "$REPO" --reason completed
+
+      - name: Fail the job if the automation failed
+        if: steps.run_automation.outcome != 'success'
+        run: exit 1

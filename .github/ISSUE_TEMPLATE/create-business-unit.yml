@@ -1,0 +1,25 @@
+name: Create Business Unit
+description: Create a new SFMC Marketing Cloud Business Unit
+title: "Create New Business Unit"
+labels:
+  - create-business-unit
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill this in and submit — a workflow will pick it up automatically,
+        create the Business Unit, apply settings, assign admin users, and
+        post the results as a comment on this issue.
+        All other settings (company info, admin users, etc.) are
+        pre-configured and not set here.
+  - type: input
+    id: bu_name
+    attributes:
+      label: Business Unit Name
+      description: >
+        The name for the new Business Unit. This is also used as its
+        External Key / Customer Key in SFMC, so it must be unique across
+        the account.
+      placeholder: e.g. NTO Student BU 0001
+    validations:
+      required: true
