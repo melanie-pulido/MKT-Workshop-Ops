@@ -48,6 +48,7 @@ jobs:
           # clock (which could be wrong/spoofed).
           STAMP="$(date -u -d "$CREATED_AT" +"%m/%d/%Y %-I:%M%p UTC")"
           gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --title "New User Creation - $STAMP"
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "⏳ New User Creation in progress…"
 
       - name: Parse issue body into TARGET_BU_NAME / USER_LIST
         env:
