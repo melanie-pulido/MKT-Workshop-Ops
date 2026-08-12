@@ -16,7 +16,7 @@ body:
       label: Environment
       description: Which SFMC environment is this in?
       options:
-        - MC Events 2 (MID 517022562)
+        - MC Events 2 (MID 517032594)
         - MC Events 3 (MID 517035532)
     validations:
       required: true

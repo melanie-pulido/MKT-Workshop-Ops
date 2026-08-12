@@ -60,7 +60,7 @@ jobs:
           MC_EVENTS_3_LOG_DE_KEY_CREATE_USERS: ${{ vars.MC_EVENTS_3_LOG_DE_KEY_CREATE_USERS }}
         run: |
           case "$ORG" in
-            "MC Events 2 (MID 517022562)")
+            "MC Events 2 (MID 517032594)")
               {
                 echo "SFMC_SUBDOMAIN=$MC_EVENTS_2_SUBDOMAIN"
                 echo "SFMC_CLIENT_ID=$MC_EVENTS_2_CLIENT_ID"

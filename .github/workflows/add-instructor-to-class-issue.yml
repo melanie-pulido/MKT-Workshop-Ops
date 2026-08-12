@@ -54,7 +54,7 @@ jobs:
           MC_EVENTS_3_PARENT_MID:    ${{ vars.MC_EVENTS_3_PARENT_MID }}
         run: |
           case "$ORG" in
-            "MC Events 2 (MID 517022562)")
+            "MC Events 2 (MID 517032594)")
               {
                 echo "SFMC_SUBDOMAIN=$MC_EVENTS_2_SUBDOMAIN"
                 echo "SFMC_CLIENT_ID=$MC_EVENTS_2_CLIENT_ID"

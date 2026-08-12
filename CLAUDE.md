@@ -13,7 +13,7 @@ SFMC access can submit requests through a Google Form or GitHub Issues.
 
 | Label in forms/issues | Parent MID |
 |---|---|
-| MC Events 2 (MID 517022562) | 517022562 |
+| MC Events 2 (MID 517032594) | 517032594 |
 | MC Events 3 (MID 517035532) | 517035532 |
 
 Every workflow routes to the right org's credentials at runtime using a
