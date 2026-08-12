@@ -8,7 +8,8 @@
     "create-bu": "node scripts/run.js",
     "create-users": "node scripts/create-users.js",
     "create-instructor-user": "node scripts/create-instructor-user.js",
-    "delete-bu": "node scripts/delete-bu.js"
+    "delete-bu": "node scripts/delete-bu.js",
+    "add-instructor-to-class": "node scripts/add-instructor-to-class.js"
   },
   "dependencies": {
     "axios": "^1.7.7",

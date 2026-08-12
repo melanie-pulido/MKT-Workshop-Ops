@@ -1,0 +1,114 @@
+name: Add Instructor to Class (Issue Form)
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  add-instructor-to-class:
+    if: contains(github.event.issue.labels.*.name, 'add-instructor-to-class')
+    runs-on: ubuntu-latest
+    environment: sfmc-production
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Rename issue title with creation timestamp
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          CREATED_AT: ${{ github.event.issue.created_at }}
+        run: |
+          STAMP="$(TZ='America/Los_Angeles' date -d "$CREATED_AT" +"%m/%d/%Y %-I:%M%p PST")"
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --title "Add Instructor to Class - $STAMP"
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "⏳ Adding instructor to class in progress…"
+
+      - name: Parse issue body
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: node scripts/parse-add-instructor-issue-body.js
+
+      - name: Route org credentials
+        env:
+          ORG: ${{ env.ORG }}
+          MC_EVENTS_2_SUBDOMAIN:     ${{ secrets.MC_EVENTS_2_SUBDOMAIN }}
+          MC_EVENTS_2_CLIENT_ID:     ${{ secrets.MC_EVENTS_2_CLIENT_ID }}
+          MC_EVENTS_2_CLIENT_SECRET: ${{ secrets.MC_EVENTS_2_CLIENT_SECRET }}
+          MC_EVENTS_2_PARENT_MID:    ${{ vars.MC_EVENTS_2_PARENT_MID }}
+          MC_EVENTS_3_SUBDOMAIN:     ${{ secrets.MC_EVENTS_3_SUBDOMAIN }}
+          MC_EVENTS_3_CLIENT_ID:     ${{ secrets.MC_EVENTS_3_CLIENT_ID }}
+          MC_EVENTS_3_CLIENT_SECRET: ${{ secrets.MC_EVENTS_3_CLIENT_SECRET }}
+          MC_EVENTS_3_PARENT_MID:    ${{ vars.MC_EVENTS_3_PARENT_MID }}
+        run: |
+          case "$ORG" in
+            "MC Events 2 (MID 517022562)")
+              {
+                echo "SFMC_SUBDOMAIN=$MC_EVENTS_2_SUBDOMAIN"
+                echo "SFMC_CLIENT_ID=$MC_EVENTS_2_CLIENT_ID"
+                echo "SFMC_CLIENT_SECRET=$MC_EVENTS_2_CLIENT_SECRET"
+                echo "SFMC_PARENT_MID=$MC_EVENTS_2_PARENT_MID"
+              } >> "$GITHUB_ENV"
+              ;;
+            "MC Events 3 (MID 517035532)")
+              {
+                echo "SFMC_SUBDOMAIN=$MC_EVENTS_3_SUBDOMAIN"
+                echo "SFMC_CLIENT_ID=$MC_EVENTS_3_CLIENT_ID"
+                echo "SFMC_CLIENT_SECRET=$MC_EVENTS_3_CLIENT_SECRET"
+                echo "SFMC_PARENT_MID=$MC_EVENTS_3_PARENT_MID"
+              } >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "❌ Unknown org: $ORG" >&2
+              exit 1
+              ;;
+          esac
+          echo "Routed credentials for: $ORG"
+
+      - name: Run Add Instructor to Class automation
+        id: run_automation
+        continue-on-error: true
+        env:
+          # SFMC_SUBDOMAIN, SFMC_CLIENT_ID, SFMC_CLIENT_SECRET, SFMC_PARENT_MID
+          # come from GITHUB_ENV via the routing step above.
+          # INSTRUCTOR_USERNAME and CLASS_BU_NAME come from GITHUB_ENV via parse step.
+          PLACEHOLDER: ""
+        run: npm run add-instructor-to-class
+
+      - name: Post results as an issue comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -s /tmp/add-instructor-report.md ]; then
+            cat /tmp/add-instructor-report.md > /tmp/comment-body.md
+          else
+            echo "_(No report generated — the automation step may have failed before producing output.)_" > /tmp/comment-body.md
+          fi
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body-file /tmp/comment-body.md
+
+      - name: Close issue on success
+        if: steps.run_automation.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+        run: gh issue close "$ISSUE_NUMBER" --repo "$REPO" --reason completed
+
+      - name: Fail the job if the automation failed
+        if: steps.run_automation.outcome != 'success'
+        run: exit 1

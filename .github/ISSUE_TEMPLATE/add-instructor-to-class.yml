@@ -1,0 +1,37 @@
+name: Add Instructor to Class
+description: Give an existing instructor user access to a class Business Unit
+title: "Add Instructor to Class"
+labels:
+  - add-instructor-to-class
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill this in and submit — a workflow will pick it up automatically,
+        add the instructor to the Business Unit, and post the result as a
+        comment on this issue. Existing permissions are not changed.
+  - type: dropdown
+    id: org
+    attributes:
+      label: Environment
+      description: Which SFMC environment is this in?
+      options:
+        - MC Events 2 (MID 517022562)
+        - MC Events 3 (MID 517035532)
+    validations:
+      required: true
+  - type: input
+    id: instructor_username
+    attributes:
+      label: Instructor Username
+      placeholder: e.g. THA_JSmith
+    validations:
+      required: true
+  - type: input
+    id: class_bu_name
+    attributes:
+      label: Class Business Unit Name
+      description: Must match exactly as it appears in Setup → Account → Business Units.
+      placeholder: e.g. NTO Student BU 0001
+    validations:
+      required: true

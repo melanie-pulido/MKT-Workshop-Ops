@@ -45,6 +45,11 @@ function onFormSubmit(e) {
     body  = formatBUBody(data);
     label = "create-business-unit";
 
+  } else if (action === "Add Instructor to Class") {
+    title = "Add Instructor to Class";
+    body  = formatAddInstructorBody(data);
+    label = "add-instructor-to-class";
+
   } else {
     Logger.log("Unknown action: " + action);
     return;
@@ -87,6 +92,12 @@ function formatUsersBody(data) {
 function formatBUBody(data) {
   return "### Environment\n\n"        + data["Environment"]        + "\n\n" +
          "### Business Unit Name\n\n" + data["Business Unit Name"];
+}
+
+function formatAddInstructorBody(data) {
+  return "### Environment\n\n"              + data["Environment"]              + "\n\n" +
+         "### Instructor Username\n\n"      + data["Instructor Username"]      + "\n\n" +
+         "### Class Business Unit Name\n\n" + data["Class Business Unit Name"];
 }
 
 // ---------------------------------------------------------------------------
