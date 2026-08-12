@@ -116,14 +116,6 @@ async function main() {
   if (!createResult.ok) {
     await log(`Failed: ${createResult.statusMessage}`);
     summaryLine(`❌ **FAILED:** ${createResult.statusMessage}`);
-    summaryLine("");
-    summaryLine("<details><summary>Raw SOAP response</summary>");
-    summaryLine("");
-    summaryLine("```xml");
-    summaryLine(createResult.raw || "(empty)");
-    summaryLine("```");
-    summaryLine("");
-    summaryLine("</details>");
     process.exitCode = 1;
     return;
   }
