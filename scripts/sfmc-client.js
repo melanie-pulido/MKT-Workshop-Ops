@@ -161,11 +161,16 @@ class SfmcClient {
 
   /** Assign a Business Unit to an existing AccountUser. Mirrors 1.3 Step 3. */
   async assignUserToBusinessUnit({ userCustomerKey, targetMID, parentMID }) {
+    // Both CustomerKey and UserID are required so SFMC treats this as an
+    // Update of an existing user rather than a Create (which would then
+    // demand Name, Email, and Password).  For SFMC AccountUsers the
+    // CustomerKey is the same value as the UserID (the login username).
     const body =
       '<UpdateRequest xmlns="http://exacttarget.com/wsdl/partnerAPI">' +
       '<Objects xsi:type="AccountUser">' +
       `<Client><ID>${parentMID}</ID></Client>` +
       `<CustomerKey>${escapeXml(userCustomerKey)}</CustomerKey>` +
+      `<UserID>${escapeXml(userCustomerKey)}</UserID>` +
       "<AssociatedBusinessUnits>" +
       `<BusinessUnit><ID>${targetMID}</ID></BusinessUnit>` +
       "</AssociatedBusinessUnits>" +
