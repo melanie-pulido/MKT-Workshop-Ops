@@ -69,9 +69,11 @@ must read exactly `Environment` or the parse scripts will fail to extract it.
 ### Notable SFMC SOAP behaviors
 - **Create user** requires a two-call sequence: Create then Update `MustChangePassword=false`.
   SFMC's Create call does not reliably honor MustChangePassword on its own.
-- **assignUserToBusinessUnit** UpdateRequest must include BOTH `<CustomerKey>` AND `<UserID>`
-  (same value: the username). Without `<UserID>`, SFMC treats it as a Create and demands
-  Name/Email/Password.
+- **assignUserToBusinessUnit** UpdateRequest must include BOTH `<CustomerKey>` AND `<UserID>`.
+  `<UserID>` must be the actual login username, NOT the CustomerKey — they can differ (e.g.
+  admin users may have a UUID CustomerKey but a human-readable UserID). The code now does a
+  Retrieve by CustomerKey first to get the real UserID. Without `<UserID>`, SFMC treats it
+  as a Create and demands Name/Email/Password.
 - **DEFAULT_ADMIN_USER_KEYS** is optional — `run.js` handles empty string gracefully.
 
 ---
