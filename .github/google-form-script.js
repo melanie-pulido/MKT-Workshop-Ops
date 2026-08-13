@@ -56,6 +56,7 @@ function onFormSubmit(e) {
   }
 
   var submitterEmail = e.response.getRespondentEmail();
+  if (submitterEmail) body += "\n\n### Submitted By\n\n" + submitterEmail;
   var issueUrl = createGitHubIssue(title, body, label);
 
   if (issueUrl && submitterEmail) {
