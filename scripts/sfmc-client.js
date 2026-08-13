@@ -159,18 +159,45 @@ class SfmcClient {
     return map;
   }
 
+  /** Retrieve a single AccountUser by CustomerKey. Returns { userID, name } or null. */
+  async retrieveUserByCustomerKey(customerKey) {
+    const body =
+      '<RetrieveRequestMsg xmlns="http://exacttarget.com/wsdl/partnerAPI">' +
+      "<RetrieveRequest>" +
+      "<ObjectType>AccountUser</ObjectType>" +
+      "<Properties>UserID</Properties>" +
+      "<Properties>Name</Properties>" +
+      '<Filter xsi:type="SimpleFilterPart">' +
+      "<Property>CustomerKey</Property>" +
+      "<SimpleOperator>equals</SimpleOperator>" +
+      `<Value>${escapeXml(customerKey)}</Value>` +
+      "</Filter>" +
+      "</RetrieveRequest>" +
+      "</RetrieveRequestMsg>";
+
+    const raw = await this._soapRequest("Retrieve", body);
+    const userID = firstMatch(raw, /<UserID>([\s\S]*?)<\/UserID>/);
+    const name = firstMatch(raw, /<Name>([\s\S]*?)<\/Name>/);
+    return userID ? { userID, name } : null;
+  }
+
   /** Assign a Business Unit to an existing AccountUser. Mirrors 1.3 Step 3. */
   async assignUserToBusinessUnit({ userCustomerKey, targetMID, parentMID }) {
-    // Both CustomerKey and UserID are required so SFMC treats this as an
-    // Update of an existing user rather than a Create (which would then
-    // demand Name, Email, and Password).  For SFMC AccountUsers the
-    // CustomerKey is the same value as the UserID (the login username).
+    // Retrieve the actual UserID (login username) for this CustomerKey — they
+    // are different values for some admin users (e.g. CustomerKey is a UUID but
+    // UserID is a human-readable username). Setting <UserID> to the wrong value
+    // would silently rename the login username.
+    const user = await this.retrieveUserByCustomerKey(userCustomerKey);
+    if (!user) {
+      return { ok: false, statusCode: "NOT_FOUND", statusMessage: `No user found with CustomerKey "${userCustomerKey}"`, newId: null, raw: "" };
+    }
+
     const body =
       '<UpdateRequest xmlns="http://exacttarget.com/wsdl/partnerAPI">' +
       '<Objects xsi:type="AccountUser">' +
       `<Client><ID>${parentMID}</ID></Client>` +
       `<CustomerKey>${escapeXml(userCustomerKey)}</CustomerKey>` +
-      `<UserID>${escapeXml(userCustomerKey)}</UserID>` +
+      `<UserID>${escapeXml(user.userID)}</UserID>` +
       "<AssociatedBusinessUnits>" +
       `<BusinessUnit><ID>${targetMID}</ID></BusinessUnit>` +
       "</AssociatedBusinessUnits>" +
