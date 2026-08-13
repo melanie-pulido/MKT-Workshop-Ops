@@ -76,6 +76,19 @@ must read exactly `Environment` or the parse scripts will fail to extract it.
   as a Create and demands Name/Email/Password.
 - **DEFAULT_ADMIN_USER_KEYS** is optional — `run.js` handles empty string gracefully.
 
+### Admin users (DEFAULT_ADMIN_USER_KEYS)
+
+| Org | CustomerKey (stored in GitHub Variables) | UserID (login username) | Name |
+|---|---|---|---|
+| MC Events 2 | `2fd72fe8-056a-44da-bd58-8577bae607c1` | `2025 T&C Events2` | `2025 T&C Events2` |
+| MC Events 2 | `41d00814-c9a4-41f0-a846-af2410ce288c` | `SFMC_VIW_Ops_2` | `SFMC_VIW_Ops_2` |
+| MC Events 3 | `MKT_VIW_001` | `MKT_VIW_001` | `MKT_VIW_ 001` |
+| MC Events 3 | `SFMC_VIW_Ops_3` | `SFMC_VIW_Ops_3` | `SFMC_VIW_Ops_3` |
+
+Note: MC Events 2 admin users have UUID CustomerKeys that differ from their login UserIDs.
+The `SFMC_VIW_Ops_2` user was formerly named `SFMC_VIW_Ops_1` — renamed due to a username
+conflict caused by an earlier bug (now fixed) that overwrote the UserID with the CustomerKey.
+
 ---
 
 ## Google Form bridge
