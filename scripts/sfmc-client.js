@@ -159,6 +159,29 @@ class SfmcClient {
     return map;
   }
 
+
+  /** Retrieve a single AccountUser by UserID (login username). Returns { customerKey, name } or null. */
+  async retrieveUserByUserID(userID) {
+    const body =
+      '<RetrieveRequestMsg xmlns="http://exacttarget.com/wsdl/partnerAPI">' +
+      "<RetrieveRequest>" +
+      "<ObjectType>AccountUser</ObjectType>" +
+      "<Properties>CustomerKey</Properties>" +
+      "<Properties>Name</Properties>" +
+      '<Filter xsi:type="SimpleFilterPart">' +
+      "<Property>UserID</Property>" +
+      "<SimpleOperator>equals</SimpleOperator>" +
+      `<Value>${escapeXml(userID)}</Value>` +
+      "</Filter>" +
+      "</RetrieveRequest>" +
+      "</RetrieveRequestMsg>";
+
+    const raw = await this._soapRequest("Retrieve", body);
+    const customerKey = firstMatch(raw, /<CustomerKey>([\s\S]*?)<\/CustomerKey>/);
+    const name = firstMatch(raw, /<Name>([\s\S]*?)<\/Name>/);
+    return customerKey ? { customerKey, name } : null;
+  }
+
   /** Retrieve a single AccountUser by CustomerKey. Returns { userID, name } or null. */
   async retrieveUserByCustomerKey(customerKey) {
     const body =
