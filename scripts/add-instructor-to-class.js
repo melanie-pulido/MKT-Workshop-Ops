@@ -61,10 +61,24 @@ async function main() {
 
   summaryLine(`Resolved "${classBuName}" → MID ${targetMID}`);
   summaryLine("");
+
+  // Resolve UserID (login username) → CustomerKey.
+  // The issue form supplies a UserID (e.g. dhendrick_events_2025_2), but
+  // assignUserToBusinessUnit() requires the AccountUser CustomerKey (a UUID).
+  summaryLine("### Resolving instructor username to CustomerKey…");
+  const userRecord = await client.retrieveUserByUserID(username);
+  if (!userRecord) {
+    summaryLine(`❌ **FAILED:** No user found with UserID "${username}". Check the username in SFMC Setup → Users.`);
+    process.exitCode = 1;
+    return;
+  }
+  summaryLine(`Resolved "${username}" → CustomerKey ${userRecord.customerKey} (${userRecord.name})`);
+  summaryLine("");
+
   summaryLine("### Assigning instructor to Business Unit…");
 
   const result = await client.assignUserToBusinessUnit({
-    userCustomerKey: username,
+    userCustomerKey: userRecord.customerKey,
     targetMID,
     parentMID: authMID,
   });
